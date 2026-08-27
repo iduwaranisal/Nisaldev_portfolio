@@ -16,7 +16,7 @@ import { usePortfolio } from "@/context/PortfolioContext";
 
 export default function Hero() {
   const { data } = usePortfolio();
-  const { general } = data;
+  const { general, contactSection } = data;
 
   return (
     <section
@@ -84,8 +84,11 @@ export default function Hero() {
               </a>
 
               <a
-                href="#contact"
-                className="inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-medium text-xs text-slate-500 hover:text-orange-600 transition-colors cursor-pointer"
+                href={contactSection.resumePdfUrl || "/resume.pdf"}
+                target="_blank"
+                rel="noopener noreferrer"
+                download="Resume_Iduwara_Nisal.pdf"
+                className="inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl font-semibold text-xs text-slate-600 hover:text-orange-600 transition-colors cursor-pointer"
               >
                 <Download className="w-4 h-4" />
                 <span>{general.resumeBtnText}</span>

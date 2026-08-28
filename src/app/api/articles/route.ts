@@ -18,14 +18,23 @@ export async function POST(req: Request) {
     await connectToDatabase();
     const body = await req.json();
 
+    delete body._id;
+    delete body.__v;
+
     if (!body.id) {
       body.id = `art-${Date.now()}`;
     }
 
-    const article = await ArticleModel.create(body);
+    const article = await ArticleModel.findOneAndUpdate(
+      { id: body.id },
+      { $set: body },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+
     return NextResponse.json({ success: true, article });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to create article in MongoDB";
+    console.error("POST /api/articles error:", error);
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

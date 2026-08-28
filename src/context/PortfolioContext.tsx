@@ -156,148 +156,218 @@ export function PortfolioProvider({
   };
 
   const updateProjectsSection = async (fields: Partial<PortfolioData["projectsSection"]>) => {
-    const updated: PortfolioData = {
-      ...data,
-      projectsSection: { ...data.projectsSection, ...fields },
-    };
-    setData(updated);
+    setData((prev) => {
+      const updated = {
+        ...prev,
+        projectsSection: { ...prev.projectsSection, ...fields },
+      };
+      try {
+        localStorage.setItem("nisaldev_portfolio_cms_data_2026", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
   };
 
   const addProject = async (project: Project) => {
-    const updated: PortfolioData = {
-      ...data,
-      projectsSection: {
-        ...data.projectsSection,
-        projects: [project, ...data.projectsSection.projects],
-      },
-    };
-    setData(updated);
+    setData((prev) => {
+      const existing = prev.projectsSection?.projects || [];
+      const updated = {
+        ...prev,
+        projectsSection: {
+          ...prev.projectsSection,
+          projects: [project, ...existing.filter((p) => p.id !== project.id)],
+        },
+      };
+      try {
+        localStorage.setItem("nisaldev_portfolio_cms_data_2026", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
 
     try {
-      await fetch("/api/projects", {
+      const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(project),
       });
+      if (!res.ok) {
+        throw new Error(`API error: ${res.statusText}`);
+      }
     } catch (err) {
       console.error("Failed to add project to MongoDB:", err);
+      throw err;
     }
   };
 
   const updateProject = async (id: string, updatedFields: Partial<Project>) => {
-    const updatedProjects = data.projectsSection.projects.map((p) =>
-      p.id === id ? { ...p, ...updatedFields } : p
-    );
-    const updated: PortfolioData = {
-      ...data,
-      projectsSection: {
-        ...data.projectsSection,
-        projects: updatedProjects,
-      },
-    };
-    setData(updated);
+    setData((prev) => {
+      const existing = prev.projectsSection?.projects || [];
+      const updatedProjects = existing.map((p) =>
+        p.id === id ? { ...p, ...updatedFields } : p
+      );
+      const updated = {
+        ...prev,
+        projectsSection: {
+          ...prev.projectsSection,
+          projects: updatedProjects,
+        },
+      };
+      try {
+        localStorage.setItem("nisaldev_portfolio_cms_data_2026", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
 
     try {
-      await fetch(`/api/projects/${id}`, {
+      const res = await fetch(`/api/projects/${encodeURIComponent(id)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedFields),
       });
+      if (!res.ok) {
+        throw new Error(`API error: ${res.statusText}`);
+      }
     } catch (err) {
       console.error("Failed to update project in MongoDB:", err);
+      throw err;
     }
   };
 
   const deleteProject = async (id: string) => {
-    const updatedProjects = data.projectsSection.projects.filter((p) => p.id !== id);
-    const updated: PortfolioData = {
-      ...data,
-      projectsSection: {
-        ...data.projectsSection,
-        projects: updatedProjects,
-      },
-    };
-    setData(updated);
+    setData((prev) => {
+      const existing = prev.projectsSection?.projects || [];
+      const updatedProjects = existing.filter((p) => p.id !== id);
+      const updated = {
+        ...prev,
+        projectsSection: {
+          ...prev.projectsSection,
+          projects: updatedProjects,
+        },
+      };
+      try {
+        localStorage.setItem("nisaldev_portfolio_cms_data_2026", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
 
     try {
-      await fetch(`/api/projects/${id}`, {
+      const res = await fetch(`/api/projects/${encodeURIComponent(id)}`, {
         method: "DELETE",
       });
+      if (!res.ok) {
+        throw new Error(`API error: ${res.statusText}`);
+      }
     } catch (err) {
       console.error("Failed to delete project from MongoDB:", err);
+      throw err;
     }
   };
 
   const updateArticlesSection = async (fields: Partial<PortfolioData["articlesSection"]>) => {
-    const updated: PortfolioData = {
-      ...data,
-      articlesSection: { ...data.articlesSection, ...fields },
-    };
-    setData(updated);
+    setData((prev) => {
+      const updated = {
+        ...prev,
+        articlesSection: { ...prev.articlesSection, ...fields },
+      };
+      try {
+        localStorage.setItem("nisaldev_portfolio_cms_data_2026", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
   };
 
   const addArticle = async (article: Article) => {
-    const updated: PortfolioData = {
-      ...data,
-      articlesSection: {
-        ...data.articlesSection,
-        articles: [article, ...data.articlesSection.articles],
-      },
-    };
-    setData(updated);
+    setData((prev) => {
+      const existing = prev.articlesSection?.articles || [];
+      const updated = {
+        ...prev,
+        articlesSection: {
+          ...prev.articlesSection,
+          articles: [article, ...existing.filter((a) => a.id !== article.id)],
+        },
+      };
+      try {
+        localStorage.setItem("nisaldev_portfolio_cms_data_2026", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
 
     try {
-      await fetch("/api/articles", {
+      const res = await fetch("/api/articles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(article),
       });
+      if (!res.ok) {
+        throw new Error(`API error: ${res.statusText}`);
+      }
     } catch (err) {
       console.error("Failed to add article to MongoDB:", err);
+      throw err;
     }
   };
 
   const updateArticle = async (id: string, updatedFields: Partial<Article>) => {
-    const updatedArticles = data.articlesSection.articles.map((a) =>
-      a.id === id ? { ...a, ...updatedFields } : a
-    );
-    const updated: PortfolioData = {
-      ...data,
-      articlesSection: {
-        ...data.articlesSection,
-        articles: updatedArticles,
-      },
-    };
-    setData(updated);
+    setData((prev) => {
+      const existing = prev.articlesSection?.articles || [];
+      const updatedArticles = existing.map((a) =>
+        a.id === id ? { ...a, ...updatedFields } : a
+      );
+      const updated = {
+        ...prev,
+        articlesSection: {
+          ...prev.articlesSection,
+          articles: updatedArticles,
+        },
+      };
+      try {
+        localStorage.setItem("nisaldev_portfolio_cms_data_2026", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
 
     try {
-      await fetch(`/api/articles/${id}`, {
+      const res = await fetch(`/api/articles/${encodeURIComponent(id)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedFields),
       });
+      if (!res.ok) {
+        throw new Error(`API error: ${res.statusText}`);
+      }
     } catch (err) {
       console.error("Failed to update article in MongoDB:", err);
+      throw err;
     }
   };
 
   const deleteArticle = async (id: string) => {
-    const updatedArticles = data.articlesSection.articles.filter((a) => a.id !== id);
-    const updated: PortfolioData = {
-      ...data,
-      articlesSection: {
-        ...data.articlesSection,
-        articles: updatedArticles,
-      },
-    };
-    setData(updated);
+    setData((prev) => {
+      const existing = prev.articlesSection?.articles || [];
+      const updatedArticles = existing.filter((a) => a.id !== id);
+      const updated = {
+        ...prev,
+        articlesSection: {
+          ...prev.articlesSection,
+          articles: updatedArticles,
+        },
+      };
+      try {
+        localStorage.setItem("nisaldev_portfolio_cms_data_2026", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
 
     try {
-      await fetch(`/api/articles/${id}`, {
+      const res = await fetch(`/api/articles/${encodeURIComponent(id)}`, {
         method: "DELETE",
       });
+      if (!res.ok) {
+        throw new Error(`API error: ${res.statusText}`);
+      }
     } catch (err) {
       console.error("Failed to delete article from MongoDB:", err);
+      throw err;
     }
   };
 

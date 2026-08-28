@@ -19,7 +19,7 @@ export default function BentoGrid() {
   const { bento } = skillsSection;
 
   return (
-    <section id="skills" className="relative py-20 lg:py-28 overflow-hidden">
+    <section id="skills" aria-labelledby="skills-heading" className="relative py-20 lg:py-28 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="flex flex-col items-center text-center space-y-4 mb-16">
@@ -28,21 +28,21 @@ export default function BentoGrid() {
             <span>{skillsSection.subBadge}</span>
           </div>
 
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 font-display tracking-tight">
+          <h2 id="skills-heading" className="text-3xl sm:text-5xl font-extrabold text-slate-900 font-display tracking-tight">
             {skillsSection.titleMain}{" "}
             <span className="text-gradient-orange">{skillsSection.titleAccent}</span>{" "}
             {skillsSection.titleEnd}
           </h2>
 
-          <p className="text-slate-600 max-w-2xl text-sm sm:text-base">
+          <p className="text-slate-600 max-w-3xl text-sm sm:text-base leading-relaxed">
             {skillsSection.description}
           </p>
         </div>
 
-        {/* Apple-Style Asymmetric Bento Grid */}
+        {/* Asymmetric Bento Grid of Skills */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Bento 1: AI & Machine Learning (Span 7) */}
-          <div className="md:col-span-7 rounded-3xl p-6 sm:p-8 bg-white border border-stone-200 hover:border-orange-300 transition-all duration-200 shadow-warm-sm hover:shadow-warm-md relative overflow-hidden group">
+          {/* Bento 1: Artificial Intelligence (Span 7) */}
+          <article className="md:col-span-7 rounded-3xl p-6 sm:p-8 bg-white border border-stone-200 hover:border-orange-300 transition-all duration-200 shadow-warm-sm hover:shadow-warm-md relative overflow-hidden group flex flex-col justify-between">
             <div className="relative z-10 flex flex-col h-full justify-between space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -58,7 +58,9 @@ export default function BentoGrid() {
                   <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-display">
                     {bento.bento1.title}
                   </h3>
-                  <p className="text-sm text-slate-600 mt-1">{bento.bento1.description}</p>
+                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                    {bento.bento1.description}
+                  </p>
                 </div>
 
                 {/* Skill Chips / Tags */}
@@ -95,10 +97,10 @@ export default function BentoGrid() {
                 </div>
               </div>
             </div>
-          </div>
+          </article>
 
-          {/* Bento 2: Full-Stack Engineering (Span 5) */}
-          <div className="md:col-span-5 rounded-3xl p-6 sm:p-8 bg-white border border-stone-200 hover:border-amber-300 transition-all duration-200 shadow-warm-sm hover:shadow-warm-md relative overflow-hidden group">
+          {/* Bento 2: Web Development (Span 5) */}
+          <article className="md:col-span-5 rounded-3xl p-6 sm:p-8 bg-white border border-stone-200 hover:border-amber-300 transition-all duration-200 shadow-warm-sm hover:shadow-warm-md relative overflow-hidden group flex flex-col justify-between">
             <div className="relative z-10 flex flex-col h-full justify-between space-y-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -114,7 +116,9 @@ export default function BentoGrid() {
                   <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-display">
                     {bento.bento2.title}
                   </h3>
-                  <p className="text-sm text-slate-600 mt-1">{bento.bento2.description}</p>
+                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                    {bento.bento2.description}
+                  </p>
                 </div>
 
                 <div className="space-y-3 pt-1">
@@ -143,10 +147,10 @@ export default function BentoGrid() {
                 </span>
               </div>
             </div>
-          </div>
+          </article>
 
-          {/* Bento 3: Database & Cloud Architecture (Span 4) */}
-          <div className="md:col-span-4 rounded-3xl p-6 sm:p-7 bg-white border border-stone-200 hover:border-orange-300 transition-all duration-200 shadow-warm-sm hover:shadow-warm-md relative overflow-hidden group">
+          {/* Bento 3: Deployment & Operations (Span 4) */}
+          <article className="md:col-span-4 rounded-3xl p-6 sm:p-7 bg-white border border-stone-200 hover:border-orange-300 transition-all duration-200 shadow-warm-sm hover:shadow-warm-md relative overflow-hidden group">
             <div className="space-y-4">
               <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600">
                 <Server className="w-5 h-5" />
@@ -168,10 +172,10 @@ export default function BentoGrid() {
                 ))}
               </div>
             </div>
-          </div>
+          </article>
 
-          {/* Bento 4: Vector & Real-Time Storage (Span 4) */}
-          <div className="md:col-span-4 rounded-3xl p-6 sm:p-7 bg-white border border-stone-200 hover:border-amber-300 transition-all duration-200 shadow-warm-sm hover:shadow-warm-md relative overflow-hidden group">
+          {/* Bento 4: Databases & Storage (Span 4) */}
+          <article className="md:col-span-4 rounded-3xl p-6 sm:p-7 bg-white border border-stone-200 hover:border-amber-300 transition-all duration-200 shadow-warm-sm hover:shadow-warm-md relative overflow-hidden group">
             <div className="space-y-4">
               <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
                 <Database className="w-5 h-5" />
@@ -193,10 +197,10 @@ export default function BentoGrid() {
                 ))}
               </div>
             </div>
-          </div>
+          </article>
 
-          {/* Bento 5: Architecture Principles (Span 4) */}
-          <div className="md:col-span-4 rounded-3xl p-6 sm:p-7 bg-white border border-stone-200 hover:border-orange-300 transition-all duration-200 shadow-warm-sm hover:shadow-warm-md relative overflow-hidden group">
+          {/* Bento 5: Architecture Principles & Philosophy (Span 4) */}
+          <article className="md:col-span-4 rounded-3xl p-6 sm:p-7 bg-white border border-stone-200 hover:border-orange-300 transition-all duration-200 shadow-warm-sm hover:shadow-warm-md relative overflow-hidden group">
             <div className="space-y-4">
               <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600">
                 <Workflow className="w-5 h-5" />
@@ -213,7 +217,7 @@ export default function BentoGrid() {
                 ))}
               </div>
             </div>
-          </div>
+          </article>
         </div>
       </div>
     </section>

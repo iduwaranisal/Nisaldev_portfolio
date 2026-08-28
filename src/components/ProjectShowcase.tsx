@@ -71,7 +71,7 @@ export default function ProjectShowcase() {
         {/* Projects Responsive Grid (Max 6) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {displayedProjects.map((project) => (
-            <div
+            <article
               key={project.id}
               className="group relative rounded-3xl bg-white border border-stone-200 hover:border-orange-300 overflow-hidden flex flex-col justify-between transition-all duration-200 shadow-warm-sm hover:shadow-warm-md hover:-translate-y-1"
             >
@@ -191,7 +191,7 @@ export default function ProjectShowcase() {
                   </div>
                 </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
 

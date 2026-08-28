@@ -15,9 +15,10 @@ export async function GET() {
   try {
     await connectToDatabase();
 
-    // Find or seed config
+    let isFirstInit = false;
     let configDoc = await PortfolioConfig.findOne();
     if (!configDoc) {
+      isFirstInit = true;
       configDoc = await PortfolioConfig.create({
         general: INITIAL_PORTFOLIO_DATA.general,
         skillsSection: INITIAL_PORTFOLIO_DATA.skillsSection,
@@ -27,16 +28,16 @@ export async function GET() {
       });
     }
 
-    // Find or seed projects
+    // Find or seed projects only on first initial setup
     let projects = await ProjectModel.find().sort({ createdAt: -1 });
-    if (!projects || projects.length === 0) {
+    if (isFirstInit && (!projects || projects.length === 0)) {
       await ProjectModel.insertMany(INITIAL_PORTFOLIO_DATA.projectsSection.projects);
       projects = await ProjectModel.find().sort({ createdAt: -1 });
     }
 
-    // Find or seed articles
+    // Find or seed articles only on first initial setup
     let articles = await ArticleModel.find().sort({ createdAt: -1 });
-    if (!articles || articles.length === 0) {
+    if (isFirstInit && (!articles || articles.length === 0)) {
       await ArticleModel.insertMany(INITIAL_PORTFOLIO_DATA.articlesSection.articles);
       articles = await ArticleModel.find().sort({ createdAt: -1 });
     }

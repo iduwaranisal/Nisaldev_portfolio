@@ -43,25 +43,27 @@ export default function Hero() {
               </span>
             </div>
 
-            {/* Main Titles */}
-            <div className="space-y-1">
+            {/* Main Titles with SEO-focused Semantic H1 */}
+            <div className="space-y-2">
               <h1 className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-tight font-display leading-[1.08]">
                 <span className="block text-slate-900">
-                  {general.role1}
+                  Iduwara Nisal Palihawadana
                 </span>
-                <span className="block text-gradient-orange font-extrabold">
-                  {general.role2}
+                <span className="block text-gradient-orange font-extrabold text-2xl sm:text-4xl xl:text-5xl mt-2">
+                  AI Architect & Full Stack Developer
                 </span>
               </h1>
             </div>
 
-            {/* Headline Tagline */}
-            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-slate-700 font-sans max-w-2xl">
-              {general.tagline}
-            </h2>
+            {/* University & Degree Subheading Tagline */}
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 rounded-lg bg-stone-100 border border-stone-200 text-xs font-mono font-semibold text-slate-700">
+                Information Systems Student · Sabaragamuwa University of Sri Lanka
+              </span>
+            </div>
 
             {/* Bio Description */}
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl">
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl font-normal">
               {general.bio}
             </p>
 

@@ -126,10 +126,84 @@ export default function AdminPage() {
   const [isUploadingProfile, setIsUploadingProfile] = useState(false);
   const [isUploadingProjectImg, setIsUploadingProjectImg] = useState(false);
   const [isUploadingResume, setIsUploadingResume] = useState(false);
+  const [isSavingProject, setIsSavingProject] = useState(false);
+  const [isSavingArticle, setIsSavingArticle] = useState(false);
 
   // Messages Inbox State
   const [inboxMessages, setInboxMessages] = useState<ContactMessageItem[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
+
+  const handleSaveProject = async () => {
+    if (!editingProject) return;
+    if (!editingProject.title.trim()) {
+      alert("Project title cannot be empty");
+      return;
+    }
+    setIsSavingProject(true);
+    try {
+      const existing = data.projectsSection.projects.some((p) => p.id === editingProject.id);
+      if (existing) {
+        await updateProject(editingProject.id, editingProject);
+      } else {
+        await addProject(editingProject);
+      }
+      setEditingProject(null);
+      showToast("Project successfully saved & synced to MongoDB!");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save project";
+      alert(`Save failed: ${msg}`);
+    } finally {
+      setIsSavingProject(false);
+    }
+  };
+
+  const handleDeleteProject = async (id: string, title: string) => {
+    if (confirm(`Are you sure you want to delete project "${title}"? This cannot be undone.`)) {
+      try {
+        await deleteProject(id);
+        showToast(`Project "${title}" deleted from database.`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to delete project";
+        alert(`Delete failed: ${msg}`);
+      }
+    }
+  };
+
+  const handleSaveArticle = async () => {
+    if (!editingArticle) return;
+    if (!editingArticle.title.trim()) {
+      alert("Article title cannot be empty");
+      return;
+    }
+    setIsSavingArticle(true);
+    try {
+      const existing = data.articlesSection.articles.some((a) => a.id === editingArticle.id);
+      if (existing) {
+        await updateArticle(editingArticle.id, editingArticle);
+      } else {
+        await addArticle(editingArticle);
+      }
+      setEditingArticle(null);
+      showToast("Article successfully saved & published!");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save article";
+      alert(`Save failed: ${msg}`);
+    } finally {
+      setIsSavingArticle(false);
+    }
+  };
+
+  const handleDeleteArticle = async (id: string, title: string) => {
+    if (confirm(`Are you sure you want to delete article "${title}"? This cannot be undone.`)) {
+      try {
+        await deleteArticle(id);
+        showToast(`Article "${title}" deleted from database.`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to delete article";
+        alert(`Delete failed: ${msg}`);
+      }
+    }
+  };
 
   const fetchMessages = useCallback(async () => {
     setLoadingMessages(true);
@@ -1107,29 +1181,31 @@ export default function AdminPage() {
                   <p className="text-xs text-slate-500">Curate showcase projects, case studies, and architecture blueprints.</p>
                 </div>
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     const newProj: Project = {
                       id: `proj-${Date.now()}`,
-                      title: "New Autonomous Intelligence System",
+                      title: "New Architectural Project",
                       category: "AI & Agents",
-                      tagline: "High-performance autonomous intelligence system.",
-                      description: "Executive summary of the system architecture and innovations.",
-                      fullOverview: "Comprehensive architectural breakdown covering technical decisions, low-latency data pipelines, and production outcomes.",
+                      tagline: "High-performance intelligent system architecture.",
+                      description: "Brief summary of the system capabilities and purpose.",
+                      fullOverview: "Detailed architectural breakdown covering technical decisions, low-latency pipelines, and production outcomes.",
                       image: "",
-                      tags: ["Next.js 16", "PyTorch", "TypeScript"],
-                      metrics: [{ label: "Throughput", value: "3.2k tok/s" }],
+                      tags: ["Next.js 16", "Python", "PyTorch"],
+                      metrics: [
+                        { label: "Performance", value: "<35ms" },
+                        { label: "Throughput", value: "3.2k tok/s" },
+                      ],
                       architectureDetails: ["Dynamic workflow orchestration", "Vector recall caching"],
-                      liveUrl: "https://demo.vercel.app",
-                      githubUrl: "https://github.com",
+                      liveUrl: "",
+                      githubUrl: "",
+                      featured: false,
                     };
-                    await addProject(newProj);
                     setEditingProject(newProj);
-                    showToast("New project added to portfolio!");
                   }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm cursor-pointer hover:shadow-warm-md transition-all"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Add Project</span>
+                  <span>Add New Project</span>
                 </button>
               </div>
 
@@ -1145,16 +1221,21 @@ export default function AdminPage() {
                         <span className="px-2.5 py-0.5 rounded-md bg-orange-50 text-orange-700 font-mono text-[10px] font-bold border border-orange-200">
                           {proj.category}
                         </span>
+                        {proj.featured && (
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-mono text-[10px] font-bold border border-emerald-200">
+                            Featured
+                          </span>
+                        )}
                         <h3 className="text-base font-bold text-slate-900 font-display">
                           {proj.title}
                         </h3>
                       </div>
-                      <p className="text-xs text-slate-500 line-clamp-1">{proj.tagline}</p>
+                      <p className="text-xs text-slate-500 line-clamp-1">{proj.tagline || proj.description}</p>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
                       <button
-                        onClick={() => setEditingProject(proj)}
+                        onClick={() => setEditingProject({ ...proj })}
                         className="px-3 py-1.5 rounded-lg bg-stone-50 border border-stone-200 text-orange-600 hover:text-orange-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                       >
                         <Edit className="w-3.5 h-3.5" />
@@ -1162,12 +1243,7 @@ export default function AdminPage() {
                       </button>
 
                       <button
-                        onClick={async () => {
-                          if (confirm(`Remove project "${proj.title}" from portfolio?`)) {
-                            await deleteProject(proj.id);
-                            showToast("Project removed from portfolio.");
-                          }
-                        }}
+                        onClick={() => handleDeleteProject(proj.id, proj.title)}
                         className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
                         title="Delete project"
                       >
@@ -1186,7 +1262,9 @@ export default function AdminPage() {
               <div className="relative w-full max-w-3xl bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-5 my-8 max-h-[90vh] overflow-y-auto shadow-warm-lg">
                 <div className="flex items-center justify-between border-b border-stone-100 pb-4">
                   <h3 className="text-xl font-bold text-slate-900 font-display">
-                    Edit Project: {editingProject.title}
+                    {data.projectsSection.projects.some((p) => p.id === editingProject.id)
+                      ? `Edit Project: ${editingProject.title}`
+                      : "Create New Project"}
                   </h3>
                   <button
                     onClick={() => setEditingProject(null)}
@@ -1199,28 +1277,23 @@ export default function AdminPage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-mono font-bold text-slate-700">Project Title</label>
+                      <label className="text-xs font-mono font-bold text-slate-700">Project Title *</label>
                       <input
                         type="text"
+                        required
                         value={editingProject.title}
-                        onChange={(e) => {
-                          const updated = { ...editingProject, title: e.target.value };
-                          setEditingProject(updated);
-                          updateProject(editingProject.id, { title: e.target.value });
-                        }}
+                        onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
                         className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-mono font-bold text-slate-700">Category</label>
+                      <label className="text-xs font-mono font-bold text-slate-700">Category *</label>
                       <input
                         type="text"
+                        required
                         value={editingProject.category}
-                        onChange={(e) => {
-                          const updated = { ...editingProject, category: e.target.value };
-                          setEditingProject(updated);
-                          updateProject(editingProject.id, { category: e.target.value });
-                        }}
+                        onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value })}
+                        placeholder="e.g. AI & Agents, Full Stack Web"
                         className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                       />
                     </div>
@@ -1263,10 +1336,8 @@ export default function AdminPage() {
                               try {
                                 const url = await handleCloudinaryUpload(file);
                                 if (url) {
-                                  const updated = { ...editingProject, image: url };
-                                  setEditingProject(updated);
-                                  await updateProject(editingProject.id, { image: url });
-                                  showToast("Asset uploaded and assigned successfully!");
+                                  setEditingProject({ ...editingProject, image: url });
+                                  showToast("Asset uploaded successfully!");
                                 }
                               } catch (err: unknown) {
                                 const msg = err instanceof Error ? err.message : "Upload failed";
@@ -1280,11 +1351,7 @@ export default function AdminPage() {
                         <input
                           type="text"
                           value={editingProject.image}
-                          onChange={(e) => {
-                            const updated = { ...editingProject, image: e.target.value };
-                            setEditingProject(updated);
-                            updateProject(editingProject.id, { image: e.target.value });
-                          }}
+                          onChange={(e) => setEditingProject({ ...editingProject, image: e.target.value })}
                           placeholder="Or paste direct image URL"
                           className="w-full px-3 py-1.5 rounded bg-white border border-stone-200 text-slate-900 text-xs font-mono"
                         />
@@ -1297,11 +1364,7 @@ export default function AdminPage() {
                     <input
                       type="text"
                       value={editingProject.tagline}
-                      onChange={(e) => {
-                        const updated = { ...editingProject, tagline: e.target.value };
-                        setEditingProject(updated);
-                        updateProject(editingProject.id, { tagline: e.target.value });
-                      }}
+                      onChange={(e) => setEditingProject({ ...editingProject, tagline: e.target.value })}
                       className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                     />
                   </div>
@@ -1311,11 +1374,7 @@ export default function AdminPage() {
                     <textarea
                       rows={2}
                       value={editingProject.description}
-                      onChange={(e) => {
-                        const updated = { ...editingProject, description: e.target.value };
-                        setEditingProject(updated);
-                        updateProject(editingProject.id, { description: e.target.value });
-                      }}
+                      onChange={(e) => setEditingProject({ ...editingProject, description: e.target.value })}
                       className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                     />
                   </div>
@@ -1325,11 +1384,25 @@ export default function AdminPage() {
                     <textarea
                       rows={4}
                       value={editingProject.fullOverview}
-                      onChange={(e) => {
-                        const updated = { ...editingProject, fullOverview: e.target.value };
-                        setEditingProject(updated);
-                        updateProject(editingProject.id, { fullOverview: e.target.value });
-                      }}
+                      onChange={(e) => setEditingProject({ ...editingProject, fullOverview: e.target.value })}
+                      className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-mono font-bold text-slate-700">
+                      Tags (Comma-separated)
+                    </label>
+                    <input
+                      type="text"
+                      value={(editingProject.tags || []).join(", ")}
+                      onChange={(e) =>
+                        setEditingProject({
+                          ...editingProject,
+                          tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
+                        })
+                      }
+                      placeholder="e.g. Next.js 16, Python, PyTorch, Docker"
                       className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                     />
                   </div>
@@ -1340,11 +1413,8 @@ export default function AdminPage() {
                       <input
                         type="text"
                         value={editingProject.liveUrl || ""}
-                        onChange={(e) => {
-                          const updated = { ...editingProject, liveUrl: e.target.value };
-                          setEditingProject(updated);
-                          updateProject(editingProject.id, { liveUrl: e.target.value });
-                        }}
+                        onChange={(e) => setEditingProject({ ...editingProject, liveUrl: e.target.value })}
+                        placeholder="https://..."
                         className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                       />
                     </div>
@@ -1353,26 +1423,43 @@ export default function AdminPage() {
                       <input
                         type="text"
                         value={editingProject.githubUrl || ""}
-                        onChange={(e) => {
-                          const updated = { ...editingProject, githubUrl: e.target.value };
-                          setEditingProject(updated);
-                          updateProject(editingProject.id, { githubUrl: e.target.value });
-                        }}
+                        onChange={(e) => setEditingProject({ ...editingProject, githubUrl: e.target.value })}
+                        placeholder="https://github.com/..."
                         className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                       />
                     </div>
                   </div>
+
+                  <div className="flex items-center gap-2 pt-2">
+                    <input
+                      type="checkbox"
+                      id="featured-checkbox"
+                      checked={!!editingProject.featured}
+                      onChange={(e) => setEditingProject({ ...editingProject, featured: e.target.checked })}
+                      className="w-4 h-4 text-orange-500 rounded border-stone-300 focus:ring-orange-500"
+                    />
+                    <label htmlFor="featured-checkbox" className="text-xs font-mono font-bold text-slate-700 cursor-pointer">
+                      Featured Project (Highlighted in Homepage Showcase)
+                    </label>
+                  </div>
                 </div>
 
-                <div className="pt-4 border-t border-stone-100 flex justify-end">
+                <div className="pt-4 border-t border-stone-100 flex items-center justify-end gap-3">
                   <button
-                    onClick={() => {
-                      setEditingProject(null);
-                      showToast("Project specifications updated!");
-                    }}
-                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm cursor-pointer"
+                    type="button"
+                    onClick={() => setEditingProject(null)}
+                    className="px-5 py-2.5 rounded-xl bg-stone-100 text-slate-700 font-bold text-xs hover:bg-stone-200 transition-colors cursor-pointer"
                   >
-                    Done & Save
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isSavingProject}
+                    onClick={handleSaveProject}
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm hover:shadow-warm-md transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {isSavingProject ? "Saving to Database..." : "Save Project"}
                   </button>
                 </div>
               </div>
@@ -1388,14 +1475,14 @@ export default function AdminPage() {
                   <p className="text-xs text-slate-500">Compose, publish, and manage architectural articles.</p>
                 </div>
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     const newArt: Article = {
                       id: `art-${Date.now()}`,
                       title: "New Architectural Publication",
                       category: "AI Systems",
                       readTime: "7 min read",
                       publishedDate: "Feb 2026",
-                      slug: "new-architectural-publication",
+                      slug: `article-${Date.now()}`,
                       tags: ["AI", "Architecture", "Engineering"],
                       excerpt: "Executive summary and core architectural takeaways.",
                       content: [
@@ -1403,14 +1490,12 @@ export default function AdminPage() {
                         "Paragraph 2 presenting benchmark metrics, latency analyses, and implementation insights.",
                       ],
                     };
-                    await addArticle(newArt);
                     setEditingArticle(newArt);
-                    showToast("New article draft created!");
                   }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm cursor-pointer hover:shadow-warm-md transition-all"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Write Article</span>
+                  <span>Write New Article</span>
                 </button>
               </div>
 
@@ -1436,7 +1521,7 @@ export default function AdminPage() {
 
                     <div className="flex items-center gap-2 shrink-0">
                       <button
-                        onClick={() => setEditingArticle(art)}
+                        onClick={() => setEditingArticle({ ...art })}
                         className="px-3 py-1.5 rounded-lg bg-stone-50 border border-stone-200 text-orange-600 hover:text-orange-700 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
                       >
                         <Edit className="w-3.5 h-3.5" />
@@ -1444,13 +1529,9 @@ export default function AdminPage() {
                       </button>
 
                       <button
-                        onClick={async () => {
-                          if (confirm(`Remove article "${art.title}"?`)) {
-                            await deleteArticle(art.id);
-                            showToast("Article removed.");
-                          }
-                        }}
+                        onClick={() => handleDeleteArticle(art.id, art.title)}
                         className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
+                        title="Delete article"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -1467,7 +1548,9 @@ export default function AdminPage() {
               <div className="relative w-full max-w-3xl bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 space-y-5 my-8 max-h-[90vh] overflow-y-auto shadow-warm-lg">
                 <div className="flex items-center justify-between border-b border-stone-100 pb-4">
                   <h3 className="text-xl font-bold text-slate-900 font-display">
-                    Edit Article: {editingArticle.title}
+                    {data.articlesSection.articles.some((a) => a.id === editingArticle.id)
+                      ? `Edit Article: ${editingArticle.title}`
+                      : "Write New Article"}
                   </h3>
                   <button
                     onClick={() => setEditingArticle(null)}
@@ -1479,30 +1562,25 @@ export default function AdminPage() {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="text-xs font-mono font-bold text-slate-700">Article Title</label>
+                    <label className="text-xs font-mono font-bold text-slate-700">Article Title *</label>
                     <input
                       type="text"
+                      required
                       value={editingArticle.title}
-                      onChange={(e) => {
-                        const updated = { ...editingArticle, title: e.target.value };
-                        setEditingArticle(updated);
-                        updateArticle(editingArticle.id, { title: e.target.value });
-                      }}
+                      onChange={(e) => setEditingArticle({ ...editingArticle, title: e.target.value })}
                       className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="text-xs font-mono font-bold text-slate-700">Category</label>
+                      <label className="text-xs font-mono font-bold text-slate-700">Category *</label>
                       <input
                         type="text"
+                        required
                         value={editingArticle.category}
-                        onChange={(e) => {
-                          const updated = { ...editingArticle, category: e.target.value };
-                          setEditingArticle(updated);
-                          updateArticle(editingArticle.id, { category: e.target.value });
-                        }}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, category: e.target.value })}
+                        placeholder="e.g. AI Systems"
                         className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                       />
                     </div>
@@ -1511,11 +1589,8 @@ export default function AdminPage() {
                       <input
                         type="text"
                         value={editingArticle.readTime}
-                        onChange={(e) => {
-                          const updated = { ...editingArticle, readTime: e.target.value };
-                          setEditingArticle(updated);
-                          updateArticle(editingArticle.id, { readTime: e.target.value });
-                        }}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, readTime: e.target.value })}
+                        placeholder="e.g. 5 min read"
                         className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                       />
                     </div>
@@ -1524,57 +1599,73 @@ export default function AdminPage() {
                       <input
                         type="text"
                         value={editingArticle.publishedDate}
-                        onChange={(e) => {
-                          const updated = { ...editingArticle, publishedDate: e.target.value };
-                          setEditingArticle(updated);
-                          updateArticle(editingArticle.id, { publishedDate: e.target.value });
-                        }}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, publishedDate: e.target.value })}
+                        placeholder="e.g. Feb 2026"
                         className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs font-mono font-bold text-slate-700">Excerpt</label>
+                    <label className="text-xs font-mono font-bold text-slate-700">
+                      Tags (Comma-separated)
+                    </label>
+                    <input
+                      type="text"
+                      value={(editingArticle.tags || []).join(", ")}
+                      onChange={(e) =>
+                        setEditingArticle({
+                          ...editingArticle,
+                          tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
+                        })
+                      }
+                      placeholder="e.g. LLMs, Next.js, Architecture"
+                      className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-mono font-bold text-slate-700">Excerpt / Summary</label>
                     <textarea
                       rows={2}
                       value={editingArticle.excerpt}
-                      onChange={(e) => {
-                        const updated = { ...editingArticle, excerpt: e.target.value };
-                        setEditingArticle(updated);
-                        updateArticle(editingArticle.id, { excerpt: e.target.value });
-                      }}
+                      onChange={(e) => setEditingArticle({ ...editingArticle, excerpt: e.target.value })}
                       className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                     />
                   </div>
 
                   <div>
                     <label className="text-xs font-mono font-bold text-slate-700">
-                      Paragraph Content (Separate with double enter)
+                      Paragraph Content (Separate paragraphs with double enter)
                     </label>
                     <textarea
                       rows={6}
-                      value={editingArticle.content.join("\n\n")}
+                      value={(editingArticle.content || []).join("\n\n")}
                       onChange={(e) => {
                         const paragraphs = e.target.value.split("\n\n").filter(Boolean);
-                        const updated = { ...editingArticle, content: paragraphs };
-                        setEditingArticle(updated);
-                        updateArticle(editingArticle.id, { content: paragraphs });
+                        setEditingArticle({ ...editingArticle, content: paragraphs });
                       }}
                       className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                     />
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-stone-100 flex justify-end">
+                <div className="pt-4 border-t border-stone-100 flex items-center justify-end gap-3">
                   <button
-                    onClick={() => {
-                      setEditingArticle(null);
-                      showToast("Article published successfully!");
-                    }}
-                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm cursor-pointer"
+                    type="button"
+                    onClick={() => setEditingArticle(null)}
+                    className="px-5 py-2.5 rounded-xl bg-stone-100 text-slate-700 font-bold text-xs hover:bg-stone-200 transition-colors cursor-pointer"
                   >
-                    Done & Save
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isSavingArticle}
+                    onClick={handleSaveArticle}
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm hover:shadow-warm-md transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {isSavingArticle ? "Publishing to Database..." : "Save Article"}
                   </button>
                 </div>
               </div>

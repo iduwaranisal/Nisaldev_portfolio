@@ -16,8 +16,10 @@ export const getCachedPortfolioData = unstable_cache(
     try {
       await connectToDatabase();
 
+      let isFirstInit = false;
       let configDoc = await PortfolioConfig.findOne().lean();
       if (!configDoc) {
+        isFirstInit = true;
         configDoc = await PortfolioConfig.create({
           general: INITIAL_PORTFOLIO_DATA.general,
           skillsSection: INITIAL_PORTFOLIO_DATA.skillsSection,
@@ -28,13 +30,13 @@ export const getCachedPortfolioData = unstable_cache(
       }
 
       let projects = await ProjectModel.find().sort({ createdAt: -1 }).lean();
-      if (!projects || projects.length === 0) {
+      if (isFirstInit && (!projects || projects.length === 0)) {
         await ProjectModel.insertMany(INITIAL_PORTFOLIO_DATA.projectsSection.projects);
         projects = await ProjectModel.find().sort({ createdAt: -1 }).lean();
       }
 
       let articles = await ArticleModel.find().sort({ createdAt: -1 }).lean();
-      if (!articles || articles.length === 0) {
+      if (isFirstInit && (!articles || articles.length === 0)) {
         await ArticleModel.insertMany(INITIAL_PORTFOLIO_DATA.articlesSection.articles);
         articles = await ArticleModel.find().sort({ createdAt: -1 }).lean();
       }

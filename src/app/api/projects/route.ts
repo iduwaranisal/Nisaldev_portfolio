@@ -18,14 +18,23 @@ export async function POST(req: Request) {
     await connectToDatabase();
     const body = await req.json();
 
+    delete body._id;
+    delete body.__v;
+
     if (!body.id) {
       body.id = `proj-${Date.now()}`;
     }
 
-    const project = await ProjectModel.create(body);
+    const project = await ProjectModel.findOneAndUpdate(
+      { id: body.id },
+      { $set: body },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+
     return NextResponse.json({ success: true, project });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to create project in MongoDB";
+    console.error("POST /api/projects error:", error);
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

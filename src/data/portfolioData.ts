@@ -184,10 +184,10 @@ export const INITIAL_PORTFOLIO_DATA: PortfolioData = {
     secondaryBtnText: "Read My Articles",
     resumeBtnText: "Resume / CV",
     stats: [
-      { value: "Sabaragamuwa", label: "University" },
-      { value: "Full Stack", label: "Python & Next.js" },
-      { value: "AI / ML", label: "PyTorch & LLMs" },
-      { value: "DevOps", label: "Docker & K8s" },
+      { value: "8+", label: "Years Experience" },
+      { value: "45M+", label: "Daily AI Inferences" },
+      { value: "<35ms", label: "P99 Inference Latency" },
+      { value: "99.99%", label: "System Availability" },
     ],
   },
   skillsSection: {

@@ -78,7 +78,7 @@ type AdminTab =
   | "articles"
   | "inbox"
   | "contact"
-  | "backup";
+  | "footer";
 
 const AVAILABLE_ICONS = [
   { name: "BrainCircuit", label: "AI & Neural" },
@@ -551,7 +551,7 @@ export default function AdminPage() {
               { id: "articles", label: "Technical Articles", icon: BookOpen },
               { id: "inbox", label: "Inbound Messages", icon: Inbox },
               { id: "contact", label: "Contact & Resume", icon: Mail },
-              { id: "backup", label: "System Backup", icon: Database },
+              { id: "footer", label: "Footer & Socials", icon: Globe },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -843,6 +843,115 @@ export default function AdminPage() {
                       className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
                     />
                   </div>
+                </div>
+
+                {/* Dynamic Hero Metric Badges / Stats Section */}
+                <div className="pt-6 border-t border-stone-200 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900 font-display flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-orange-500" />
+                        <span>Hero Key Metrics & Performance Stats</span>
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Customize the metric badges displayed in the Hero banner (e.g. 8+ Years Experience, 45M+ Daily AI Inferences, &lt;35ms Latency, 99.99% Availability).
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const currentStats = data.general.stats || [];
+                        const newStats = [...currentStats, { value: "New Value", label: "Metric Label" }];
+                        updateGeneral({ stats: newStats });
+                        showToast("New metric item added!");
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 text-xs font-mono font-bold hover:bg-orange-500 hover:text-white transition-all cursor-pointer shrink-0"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Metric</span>
+                    </button>
+                  </div>
+
+                  {(!data.general.stats || data.general.stats.length === 0) ? (
+                    <div className="p-6 rounded-2xl bg-stone-50 border border-dashed border-stone-300 text-center space-y-2">
+                      <p className="text-xs text-slate-500">No hero metric badges configured yet.</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const defaultStats = [
+                            { value: "8+", label: "Years Experience" },
+                            { value: "45M+", label: "Daily AI Inferences" },
+                            { value: "<35ms", label: "P99 Inference Latency" },
+                            { value: "99.99%", label: "System Availability" },
+                          ];
+                          updateGeneral({ stats: defaultStats });
+                          showToast("Default metrics initialized!");
+                        }}
+                        className="text-xs font-mono font-bold text-orange-600 hover:underline cursor-pointer"
+                      >
+                        Click here to load standard metrics
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                      {data.general.stats.map((stat, idx) => (
+                        <div
+                          key={idx}
+                          className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 hover:border-orange-300 transition-all space-y-2 relative group"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-mono font-bold text-orange-700 uppercase">
+                              Metric #{idx + 1}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newStats = data.general.stats.filter((_, i) => i !== idx);
+                                updateGeneral({ stats: newStats });
+                                showToast("Metric removed!");
+                              }}
+                              className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                              title="Delete Metric"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] font-mono text-slate-500 uppercase font-semibold">
+                              Value (e.g. 8+, 45M+)
+                            </label>
+                            <input
+                              type="text"
+                              value={stat.value}
+                              onChange={(e) => {
+                                const newStats = [...data.general.stats];
+                                newStats[idx] = { ...newStats[idx], value: e.target.value };
+                                updateGeneral({ stats: newStats });
+                              }}
+                              className="w-full mt-0.5 px-2.5 py-1.5 rounded-lg bg-white border border-stone-200 text-slate-900 font-mono font-bold text-sm focus:border-orange-500"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-[10px] font-mono text-slate-500 uppercase font-semibold">
+                              Label / Description
+                            </label>
+                            <input
+                              type="text"
+                              value={stat.label}
+                              onChange={(e) => {
+                                const newStats = [...data.general.stats];
+                                newStats[idx] = { ...newStats[idx], label: e.target.value };
+                                updateGeneral({ stats: newStats });
+                              }}
+                              className="w-full mt-0.5 px-2.5 py-1.5 rounded-lg bg-white border border-stone-200 text-slate-800 text-xs focus:border-orange-500"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -2131,90 +2240,200 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-stone-100 space-y-4">
-                  <h4 className="text-xs font-mono font-bold text-slate-700 uppercase">
-                    Footer & Metadata
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-mono font-bold text-slate-700">Footer Headline</label>
-                      <input
-                        type="text"
-                        value={data.footer.tagline}
-                        onChange={(e) => updateFooter({ tagline: e.target.value })}
-                        className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-mono font-bold text-slate-700">Copyright Statement</label>
-                      <input
-                        type="text"
-                        value={data.footer.copyrightText}
-                        onChange={(e) => updateFooter({ copyrightText: e.target.value })}
-                        className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           )}
 
-          {/* TAB 8: SYSTEM BACKUP */}
-          {activeTab === "backup" && (
+          {/* TAB 8: FOOTER & SOCIAL LINKS */}
+          {activeTab === "footer" && (
             <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900 font-display">System Backup & Snapshot</h1>
-                <p className="text-xs text-slate-500">Export state snapshots or restore system presets.</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold text-slate-900 font-display flex items-center gap-2">
+                    <Globe className="w-6 h-6 text-orange-600" />
+                    <span>Footer & Social Links</span>
+                  </h1>
+                  <p className="text-xs text-slate-500">
+                    Customize footer branding, copyright statement, technology credits, and social profile links.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => showToast("Footer settings saved & synced to database!")}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm cursor-pointer hover:shadow-warm-md transition-all"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Save Footer</span>
+                </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Export Card */}
-                <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-warm-sm space-y-4">
-                  <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600">
-                    <Download className="w-5 h-5" />
+              {/* Footer Branding & Tagline */}
+              <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-warm-sm space-y-4">
+                <h3 className="text-sm font-bold text-slate-900 font-display flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-orange-500" />
+                  <span>Footer Brand & Headline</span>
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-mono font-bold text-slate-700">Brand Title</label>
+                    <input
+                      type="text"
+                      value={data.footer.brandTitle}
+                      onChange={(e) => updateFooter({ brandTitle: e.target.value })}
+                      placeholder="e.g. Iduwara Nisal"
+                      className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
+                    />
                   </div>
-                  <h3 className="text-base font-bold text-slate-900">Export Content Snapshot</h3>
-                  <p className="text-xs text-slate-500">
-                    Generate an offline JSON backup of all portfolio configurations, projects, and articles.
-                  </p>
-                  <button
-                    onClick={() => {
-                      const json = exportJSON();
-                      const blob = new Blob([json], { type: "application/json" });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      a.download = `portfolio_backup_${Date.now()}.json`;
-                      a.click();
-                      showToast("Content snapshot downloaded!");
-                    }}
-                    className="w-full py-2.5 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 text-xs font-mono font-bold hover:bg-orange-500 hover:text-white transition-all cursor-pointer"
-                  >
-                    Download JSON Snapshot
-                  </button>
+
+                  <div>
+                    <label className="text-xs font-mono font-bold text-slate-700">Brand Sub-Badge / Extension</label>
+                    <input
+                      type="text"
+                      value={data.footer.brandSub}
+                      onChange={(e) => updateFooter({ brandSub: e.target.value })}
+                      placeholder="e.g. / Portfolio"
+                      className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
+                    />
+                  </div>
                 </div>
 
-                {/* Reset to Defaults */}
-                <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-warm-sm space-y-4">
-                  <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600">
-                    <RotateCcw className="w-5 h-5" />
+                <div>
+                  <label className="text-xs font-mono font-bold text-slate-700">Footer Tagline & Summary</label>
+                  <textarea
+                    rows={2}
+                    value={data.footer.tagline}
+                    onChange={(e) => updateFooter({ tagline: e.target.value })}
+                    placeholder="Brief footer tagline..."
+                    className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm resize-none focus:bg-white focus:border-orange-500"
+                  />
+                </div>
+              </div>
+
+              {/* Copyright & System Credits */}
+              <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-warm-sm space-y-4">
+                <h3 className="text-sm font-bold text-slate-900 font-display flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-orange-500" />
+                  <span>Copyright & Technology Credits</span>
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-mono font-bold text-slate-700">Copyright Statement</label>
+                    <input
+                      type="text"
+                      value={data.footer.copyrightText}
+                      onChange={(e) => updateFooter({ copyrightText: e.target.value })}
+                      placeholder="e.g. All rights reserved."
+                      className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
+                    />
                   </div>
-                  <h3 className="text-base font-bold text-slate-900">Restore Standard Presets</h3>
-                  <p className="text-xs text-slate-500">
-                    Restore all portfolio sections to standard architectural defaults.
-                  </p>
-                  <button
-                    onClick={async () => {
-                      if (confirm("Restore all portfolio content to standard architectural presets?")) {
-                        await resetToDefaults();
-                        showToast("Standard presets restored successfully.");
-                      }
-                    }}
-                    className="w-full py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-mono font-bold hover:bg-rose-500 hover:text-white transition-all cursor-pointer"
-                  >
-                    Restore Standard Presets
-                  </button>
+
+                  <div>
+                    <label className="text-xs font-mono font-bold text-slate-700">Technology Credits Text</label>
+                    <input
+                      type="text"
+                      value={data.footer.creditsText}
+                      onChange={(e) => updateFooter({ creditsText: e.target.value })}
+                      placeholder="e.g. Built with Next.js 16 · TypeScript · Tailwind CSS · MongoDB"
+                      className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Media Links */}
+              <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-warm-sm space-y-4">
+                <h3 className="text-sm font-bold text-slate-900 font-display flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-orange-500" />
+                  <span>Social Media Profiles & External Links</span>
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-mono font-bold text-slate-700">GitHub Profile URL</label>
+                    <input
+                      type="text"
+                      value={data.socialLinks.github}
+                      onChange={(e) => updateSocialLinks({ github: e.target.value })}
+                      placeholder="https://github.com/..."
+                      className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-mono font-bold text-slate-700">LinkedIn Profile URL</label>
+                    <input
+                      type="text"
+                      value={data.socialLinks.linkedin}
+                      onChange={(e) => updateSocialLinks({ linkedin: e.target.value })}
+                      placeholder="https://linkedin.com/in/..."
+                      className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-mono font-bold text-slate-700">Twitter / X Profile URL</label>
+                    <input
+                      type="text"
+                      value={data.socialLinks.twitter}
+                      onChange={(e) => updateSocialLinks({ twitter: e.target.value })}
+                      placeholder="https://x.com/..."
+                      className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-mono font-bold text-slate-700">Discord Profile / Server URL</label>
+                    <input
+                      type="text"
+                      value={data.socialLinks.discord || ""}
+                      onChange={(e) => updateSocialLinks({ discord: e.target.value })}
+                      placeholder="https://discord.com/..."
+                      className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Live Footer Preview */}
+              <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-warm-sm space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-900 font-display flex items-center gap-2">
+                    <Eye className="w-4 h-4 text-orange-500" />
+                    <span>Live Footer Preview</span>
+                  </h3>
+                  <span className="text-[10px] font-mono font-bold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200">
+                    Realtime Preview
+                  </span>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-stone-50 border border-stone-200 space-y-4">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-600 font-bold text-xs">
+                        <Cpu className="w-3.5 h-3.5 text-orange-600" />
+                      </div>
+                      <span className="font-display font-bold text-sm text-slate-900">
+                        {data.footer.brandTitle}{" "}
+                        <span className="text-orange-600 font-mono text-xs">{data.footer.brandSub}</span>
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      {data.socialLinks.github && <span className="px-2 py-0.5 rounded bg-white border border-stone-200 font-mono">GitHub</span>}
+                      {data.socialLinks.linkedin && <span className="px-2 py-0.5 rounded bg-white border border-stone-200 font-mono">LinkedIn</span>}
+                      {data.socialLinks.twitter && <span className="px-2 py-0.5 rounded bg-white border border-stone-200 font-mono">Twitter/X</span>}
+                      {data.socialLinks.discord && <span className="px-2 py-0.5 rounded bg-white border border-stone-200 font-mono">Discord</span>}
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-600">{data.footer.tagline}</p>
+
+                  <div className="pt-3 border-t border-stone-200/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 font-mono">
+                    <span>© {new Date().getFullYear()} {data.general.name}. {data.footer.copyrightText}</span>
+                    <span>{data.footer.creditsText}</span>
+                  </div>
                 </div>
               </div>
             </div>

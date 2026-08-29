@@ -47,20 +47,22 @@ export default function Hero() {
             <div className="space-y-2">
               <h1 className="text-4xl sm:text-6xl xl:text-7xl font-extrabold tracking-tight font-display leading-[1.08]">
                 <span className="block text-slate-900">
-                  Iduwara Nisal Palihawadana
+                  {general.name}
                 </span>
                 <span className="block text-gradient-orange font-extrabold text-2xl sm:text-4xl xl:text-5xl mt-2">
-                  AI Architect & Full Stack Developer
+                  {general.role1} {general.role2}
                 </span>
               </h1>
             </div>
 
-            {/* University & Degree Subheading Tagline */}
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-lg bg-stone-100 border border-stone-200 text-xs font-mono font-semibold text-slate-700">
-                Information Systems Student · Sabaragamuwa University of Sri Lanka
-              </span>
-            </div>
+            {/* Subheading Tagline */}
+            {general.tagline && (
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 rounded-lg bg-stone-100 border border-stone-200 text-xs font-mono font-semibold text-slate-700">
+                  {general.tagline}
+                </span>
+              </div>
+            )}
 
             {/* Bio Description */}
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl font-normal">

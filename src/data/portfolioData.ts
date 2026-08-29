@@ -308,155 +308,7 @@ export const INITIAL_PORTFOLIO_DATA: PortfolioData = {
     titleEnd: "& Applications",
     description: "Real-world web applications, AI tools, and software projects built with modern technologies.",
     categories: ["All", "AI & Agents", "Full Stack Web", "Cloud & Distributed"],
-    projects: [
-      {
-        id: "agentic-orchestrator",
-        title: "NeuroMesh: Multi-Agent AI Task Assistant",
-        category: "AI & Agents",
-        tagline: "Coordinated multi-agent AI system for automated research, code writing, and task planning.",
-        description:
-          "A multi-agent AI system that divides complex tasks among specialized AI assistants to gather information, write code, and verify results automatically.",
-        fullOverview:
-          "NeuroMesh organizes team-based AI workflows using LangGraph and FastAPI. Different AI agents specialize in research, coding, and validation, sharing a unified memory store using Qdrant vector database and Redis caching.",
-        image: "",
-        tags: ["LangGraph", "PyTorch", "vLLM", "Qdrant", "Next.js 16", "WebSockets", "FastAPI"],
-        metrics: [
-          { label: "Processing Speed", value: "Fast Streaming" },
-          { label: "Task Success Rate", value: "94.8%" },
-          { label: "Memory Efficiency", value: "40% Less RAM" },
-        ],
-        architectureDetails: [
-          "Step-by-step workflow planner with real-time progress updates",
-          "Searchable long-term memory using vector embeddings",
-          "Live interactive dashboard built with Next.js 16 and WebSockets",
-        ],
-        liveUrl: "https://neuromesh-demo.vercel.app",
-        githubUrl: "https://github.com/nisaldev/neuromesh-orchestrator",
-        featured: true,
-      },
-      {
-        id: "realtime-enterprise-rag",
-        title: "AuraRAG: AI Document Search & Knowledge Engine",
-        category: "AI & Agents",
-        tagline: "Fast semantic search and accurate question-answering over large document collections.",
-        description:
-          "An intelligent document search platform that reads PDFs, tables, and text files, answering user questions with exact source citations to prevent incorrect information.",
-        fullOverview:
-          "Built to make large internal document libraries easy to search. AuraRAG uses advanced embedding models and re-ranking to find the exact paragraphs needed to answer questions accurately with clickable citations.",
-        image: "",
-        tags: ["ColBERT", "Pinecone", "Next.js", "TypeScript", "Tailwind CSS", "Docker", "Python"],
-        metrics: [
-          { label: "Search Speed", value: "< 50ms" },
-          { label: "Accuracy Gain", value: "+38% Better" },
-          { label: "Docs Handled", value: "10M+ Pages" },
-        ],
-        architectureDetails: [
-          "Fast PDF and table parser for structured data extraction",
-          "Two-stage search with semantic ranking for high accuracy",
-          "Interactive chat interface with hoverable citations and markdown support",
-        ],
-        liveUrl: "https://aurarag-preview.vercel.app",
-        githubUrl: "https://github.com/nisaldev/aurarag-engine",
-        featured: true,
-      },
-      {
-        id: "hyper-scalable-fintech-gateway",
-        title: "PulseTrade: Real-Time Trading & Market Dashboard",
-        category: "Full Stack Web",
-        tagline: "Fast real-time cryptocurrency and stock trading platform with interactive live charts.",
-        description:
-          "A modern financial web application featuring live price streaming, interactive candlestick charts, instant trade simulation, and secure user authentication.",
-        fullOverview:
-          "A high-performance full-stack trading application built with Next.js 16, TypeScript, and Go. It uses WebSockets for instant live data streaming and canvas rendering for smooth 60fps price charts.",
-        image: "",
-        tags: ["Next.js 16", "TypeScript", "Tailwind CSS", "Go / Golang", "Redis", "WebGL", "Kafka"],
-        metrics: [
-          { label: "Live Updates", value: "Real-Time" },
-          { label: "Concurrent Users", value: "100k+" },
-          { label: "Uptime", value: "99.99%" },
-        ],
-        architectureDetails: [
-          "Fast WebSocket communication for live market prices",
-          "Smooth 60fps chart rendering using HTML5 Canvas",
-          "Reliable transaction management and data caching with Redis",
-        ],
-        liveUrl: "https://pulsetrade-demo.vercel.app",
-        githubUrl: "https://github.com/nisaldev/pulsetrade-gateway",
-        featured: true,
-      },
-      {
-        id: "cloud-telemetry-fabric",
-        title: "KubePulse: Cloud & Kubernetes Monitoring Dashboard",
-        category: "Cloud & Distributed",
-        tagline: "Real-time cluster health monitoring and automated alerts for Docker and Kubernetes.",
-        description:
-          "A clean monitoring dashboard that tracks server health, container status, and memory usage in real time, alerting developers before server crashes occur.",
-        fullOverview:
-          "KubePulse provides a visual overview of microservices and server health. It collects Prometheus metrics and uses AI to explain server error logs in plain English for faster troubleshooting.",
-        image: "",
-        tags: ["Kubernetes", "eBPF", "Prometheus", "Next.js", "Golang", "Framer Motion", "Three.js"],
-        metrics: [
-          { label: "Issue Resolution", value: "65% Faster" },
-          { label: "Monitored Nodes", value: "500+" },
-          { label: "Alert Accuracy", value: "99.1%" },
-        ],
-        architectureDetails: [
-          "Direct system metric collection without slowing down servers",
-          "Interactive health status map with visual alerts",
-          "Automated notifications when servers need attention",
-        ],
-        liveUrl: "https://kubepulse.vercel.app",
-        githubUrl: "https://github.com/nisaldev/kubepulse-fabric",
-      },
-      {
-        id: "neural-creative-studio",
-        title: "SynapseStudio: Visual AI Canvas & Design Studio",
-        category: "AI & Agents",
-        tagline: "Visual workflow builder connecting AI image generators, text models, and editing tools.",
-        description:
-          "An interactive visual canvas where creators can connect AI tools together to generate images, write text, and create design assets in one place.",
-        fullOverview:
-          "An easy-to-use creative workspace with infinite zoom and drag-and-drop nodes. Users can chain together image generators and text assistants, with real-time multi-user collaboration.",
-        image: "",
-        tags: ["React Flow", "Next.js 16", "Stable Diffusion", "WebRTC", "Tailwind CSS", "CUDA"],
-        metrics: [
-          { label: "Generation Speed", value: "Fast GPU" },
-          { label: "Canvas Smoothness", value: "60 FPS" },
-          { label: "Active Users", value: "25k+" },
-        ],
-        architectureDetails: [
-          "Infinite drag-and-drop canvas powered by React Flow",
-          "Real-time collaboration allowing multiple users to edit together",
-          "Fast model processing with modern web acceleration",
-        ],
-        liveUrl: "https://synapsestudio-ai.vercel.app",
-        githubUrl: "https://github.com/nisaldev/synapse-studio",
-      },
-      {
-        id: "developer-productivity-os",
-        title: "DevFlow: In-Browser Code Editor & AI Workspace",
-        category: "Full Stack Web",
-        tagline: "Fast code editor, terminal, and AI programming assistant running directly in the browser.",
-        description:
-          "A full-featured coding workspace in the browser with instant project setup, syntax highlighting, an integrated terminal, and AI code assistance.",
-        fullOverview:
-          "Allows developers to start coding instantly without installing local dependencies. Powered by WebAssembly and Monaco Editor with smart autocomplete and project sharing.",
-        image: "",
-        tags: ["WebAssembly", "TypeScript", "Next.js", "Monaco Editor", "Tailwind CSS", "Node.js"],
-        metrics: [
-          { label: "Startup Time", value: "< 350ms" },
-          { label: "Memory Usage", value: "< 80MB" },
-          { label: "User Rating", value: "98.4%" },
-        ],
-        architectureDetails: [
-          "Instant code execution in the browser using WebAssembly",
-          "Monaco code editor with smart AI auto-complete",
-          "Secure project saving with one-click sharing links",
-        ],
-        liveUrl: "https://devflow-os.vercel.app",
-        githubUrl: "https://github.com/nisaldev/devflow-os",
-      },
-    ],
+    projects: [],
   },
   articlesSection: {
     subBadge: "Articles & Insights",
@@ -464,69 +316,7 @@ export const INITIAL_PORTFOLIO_DATA: PortfolioData = {
     titleAccent: "Articles",
     titleEnd: "& Guides",
     description: "Practical guides and tutorials on building AI applications, modern web development, and database architecture.",
-    articles: [
-      {
-        id: "langgraph-agentic-patterns-2026",
-        title: "Building Reliable Multi-Agent AI Systems: Best Practices and Architecture",
-        category: "AI Systems",
-        readTime: "8 min read",
-        publishedDate: "Feb 2026",
-        slug: "architecting-multi-agent-swarms",
-        tags: ["Agents", "LangGraph", "System Design", "LLMs"],
-        excerpt:
-          "How to build multi-agent AI applications with clear task division, shared memory, and automated error handling to achieve dependable results.",
-        content: [
-          "In modern AI development, connecting multiple specialized AI assistants produces much better results than relying on single prompts. However, making these systems reliable requires careful design.",
-          "Key practices include: 1) Giving each AI agent a clear, single responsibility, 2) Validating data formats between agents, and 3) Providing a shared memory database so agents do not lose context.",
-          "By implementing validation checks between agent steps, task success rates in automated code and research pipelines improve dramatically.",
-        ],
-      },
-      {
-        id: "nextjs16-app-router-zero-latency",
-        title: "Speeding Up Next.js 16 & React 19 for Instant Page Loads",
-        category: "Web Architecture",
-        readTime: "6 min read",
-        publishedDate: "Jan 2026",
-        slug: "nextjs16-zero-latency-patterns",
-        tags: ["Next.js 16", "React 19", "Performance", "Edge Runtime"],
-        excerpt:
-          "Using Partial Prerendering (PPR), streaming components, and smart caching to make web applications load instantly.",
-        content: [
-          "Users expect modern web applications to respond instantly. Next.js Partial Prerendering makes this possible by sending the static page layout immediately while streaming dynamic data in the background.",
-          "In this guide, we walk through setting up smart caching, optimizing Tailwind CSS for small bundle sizes, and ensuring smooth UI updates with React 19.",
-        ],
-      },
-      {
-        id: "vector-embeddings-at-scale",
-        title: "Scaling Vector Databases for Fast Search Over Millions of Records",
-        category: "Distributed Systems",
-        readTime: "10 min read",
-        publishedDate: "Dec 2025",
-        slug: "scaling-hybrid-vector-search",
-        tags: ["Vector DB", "Qdrant", "HNSW", "Embeddings"],
-        excerpt:
-          "A practical comparison of vector indexing methods and databases to keep search fast and memory usage low.",
-        content: [
-          "As vector databases grow from thousands to millions of entries, keeping search fast and server memory manageable becomes important.",
-          "This article explains indexing techniques like HNSW and quantization, and shares real-world performance comparisons between Pinecone, Qdrant, and PostgreSQL.",
-        ],
-      },
-      {
-        id: "ebpf-and-ai-observability",
-        title: "Server & Container Monitoring for High-Performance AI Applications",
-        category: "Distributed Systems",
-        readTime: "7 min read",
-        publishedDate: "Nov 2025",
-        slug: "ebpf-ai-observability",
-        tags: ["eBPF", "Kubernetes", "Monitoring", "DevOps"],
-        excerpt:
-          "How to monitor CPU, GPU, and memory performance in Linux and Kubernetes to prevent application slowdowns.",
-        content: [
-          "Monitoring servers during heavy machine learning workloads is essential to prevent sudden crashes. Using lightweight Linux tools, we can track memory usage and network traffic without slowing down the application.",
-          "Combining real-time metrics with automated alerts helps developers catch issues before they affect end users.",
-        ],
-      },
-    ],
+    articles: [],
   },
   contactSection: {
     subBadge: "Get In Touch",
@@ -630,3 +420,19 @@ export function getSkillsCards(skillsSection?: any): SkillCard[] {
   }
   return INITIAL_PORTFOLIO_DATA.skillsSection.cards || [];
 }
+
+export const DUMMY_PROJECT_IDS = [
+  "agentic-orchestrator",
+  "realtime-enterprise-rag",
+  "hyper-scalable-fintech-gateway",
+  "cloud-telemetry-fabric",
+  "neural-creative-studio",
+  "developer-productivity-os",
+];
+
+export const DUMMY_ARTICLE_IDS = [
+  "langgraph-agentic-patterns-2026",
+  "nextjs16-app-router-zero-latency",
+  "vector-embeddings-at-scale",
+  "ebpf-and-ai-observability",
+];

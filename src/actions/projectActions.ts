@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ProjectModel } from "@/models/Project";
-import { Project } from "@/data/portfolioData";
+import { Project, DUMMY_PROJECT_IDS } from "@/data/portfolioData";
 
 export interface ProjectActionResult {
   success: boolean;
@@ -16,7 +16,8 @@ export interface ProjectActionResult {
 export async function getProjectsAction(): Promise<ProjectActionResult> {
   try {
     await connectToDatabase();
-    const docs = await ProjectModel.find().sort({ createdAt: -1 }).lean();
+    await ProjectModel.deleteMany({ id: { $in: DUMMY_PROJECT_IDS } });
+    const docs = await ProjectModel.find().sort({ featured: -1, createdAt: -1 }).lean();
     const projects: Project[] = (docs || []).map((p) => ({
       id: p.id,
       title: p.title,

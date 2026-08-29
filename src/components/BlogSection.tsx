@@ -37,72 +37,86 @@ export default function BlogSection() {
         </div>
 
         {/* Article Cards Grid (Max 6) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {displayedArticles.map((article) => (
-            <article
-              key={article.id}
-              onClick={() => setSelectedArticle(article)}
-              className="group cursor-pointer rounded-3xl bg-white border border-stone-200 hover:border-orange-300 transition-all duration-200 shadow-warm-sm hover:shadow-warm-md p-6 sm:p-8 flex flex-col justify-between space-y-6 hover:-translate-y-1"
-            >
-              <div className="space-y-3">
-                {/* Meta Bar */}
-                <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-700 text-xs font-mono font-bold">
-                    {article.category}
-                  </span>
-                  <div className="flex items-center gap-3 text-xs text-slate-500 font-mono">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-orange-500" />
-                      <span>{article.readTime}</span>
+        {displayedArticles.length === 0 ? (
+          <div className="p-12 text-center rounded-3xl bg-white border border-stone-200 shadow-warm-sm max-w-xl mx-auto space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600 mx-auto">
+              <BookOpen className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 font-display">Articles Coming Soon</h3>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Technical guides and tutorials are currently being written. Stay tuned for upcoming articles!
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {displayedArticles.map((article) => (
+              <article
+                key={article.id}
+                onClick={() => setSelectedArticle(article)}
+                className="group cursor-pointer rounded-3xl bg-white border border-stone-200 hover:border-orange-300 transition-all duration-200 shadow-warm-sm hover:shadow-warm-md p-6 sm:p-8 flex flex-col justify-between space-y-6 hover:-translate-y-1"
+              >
+                <div className="space-y-3">
+                  {/* Meta Bar */}
+                  <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-700 text-xs font-mono font-bold">
+                      {article.category}
+                    </span>
+                    <div className="flex items-center gap-3 text-xs text-slate-500 font-mono">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-orange-500" />
+                        <span>{article.readTime}</span>
+                      </div>
+                      <span>·</span>
+                      <span>{article.publishedDate}</span>
                     </div>
-                    <span>·</span>
-                    <span>{article.publishedDate}</span>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-display group-hover:text-orange-600 transition-colors leading-snug">
+                    {article.title}
+                  </h3>
+
+                  {/* Excerpt */}
+                  <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">
+                    {article.excerpt}
+                  </p>
+                </div>
+
+                {/* Bottom Footer: Tags & Read Link */}
+                <div className="pt-4 border-t border-stone-100 flex items-center justify-between">
+                  <div className="flex flex-wrap gap-1.5">
+                    {article.tags.slice(0, 3).map((tag, i) => (
+                      <span
+                        key={i}
+                        className="px-2 py-0.5 rounded-md bg-stone-100 text-[11px] font-mono text-slate-600"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 group-hover:text-orange-700 transition-colors">
+                    <span>Read Article</span>
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
                   </div>
                 </div>
-
-                {/* Title */}
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 font-display group-hover:text-orange-600 transition-colors leading-snug">
-                  {article.title}
-                </h3>
-
-                {/* Excerpt */}
-                <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">
-                  {article.excerpt}
-                </p>
-              </div>
-
-              {/* Bottom Footer: Tags & Read Link */}
-              <div className="pt-4 border-t border-stone-100 flex items-center justify-between">
-                <div className="flex flex-wrap gap-1.5">
-                  {article.tags.slice(0, 3).map((tag, i) => (
-                    <span
-                      key={i}
-                      className="px-2 py-0.5 rounded-md bg-stone-100 text-[11px] font-mono text-slate-600"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 group-hover:text-orange-700 transition-colors">
-                  <span>Read Article</span>
-                  <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
+              </article>
+            ))}
+          </div>
+        )}
 
         {/* See More Articles CTA Button */}
-        <div className="mt-12 flex justify-center">
-          <Link
-            href="/articles"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm text-white bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 shadow-warm-md hover:shadow-warm-lg hover:scale-102 transition-all duration-200 cursor-pointer"
-          >
-            <span>Read All Technical Publications ({articlesSection.articles.length})</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+        {articlesSection.articles.length > 0 && (
+          <div className="mt-12 flex justify-center">
+            <Link
+              href="/articles"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm text-white bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 shadow-warm-md hover:shadow-warm-lg hover:scale-102 transition-all duration-200 cursor-pointer"
+            >
+              <span>Read All Articles ({articlesSection.articles.length})</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Article Reading Modal */}

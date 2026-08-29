@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { connectToDatabase } from "@/lib/mongodb";
 import { ArticleModel } from "@/models/Article";
-import { Article } from "@/data/portfolioData";
+import { Article, DUMMY_ARTICLE_IDS } from "@/data/portfolioData";
 
 export interface ArticleActionResult {
   success: boolean;
@@ -16,6 +16,7 @@ export interface ArticleActionResult {
 export async function getArticlesAction(): Promise<ArticleActionResult> {
   try {
     await connectToDatabase();
+    await ArticleModel.deleteMany({ id: { $in: DUMMY_ARTICLE_IDS } });
     const docs = await ArticleModel.find().sort({ createdAt: -1 }).lean();
     const articles: Article[] = (docs || []).map((a) => ({
       id: a.id,

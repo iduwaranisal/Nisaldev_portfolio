@@ -5,7 +5,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { PortfolioConfig } from "@/models/PortfolioConfig";
 import { ProjectModel } from "@/models/Project";
 import { ArticleModel } from "@/models/Article";
-import { INITIAL_PORTFOLIO_DATA, PortfolioData, getSkillsCards } from "@/data/portfolioData";
+import { INITIAL_PORTFOLIO_DATA, PortfolioData, getSkillsCards, DUMMY_PROJECT_IDS, DUMMY_ARTICLE_IDS } from "@/data/portfolioData";
 
 function sanitizeUrl(url?: string): string {
   if (!url || typeof url !== "string") return "";
@@ -24,10 +24,8 @@ export async function getPortfolioDataAction(): Promise<PortfolioActionResult> {
   try {
     await connectToDatabase();
 
-    let isFirstInit = false;
     let configDoc = await PortfolioConfig.findOne().lean();
     if (!configDoc) {
-      isFirstInit = true;
       configDoc = await PortfolioConfig.create({
         general: INITIAL_PORTFOLIO_DATA.general,
         skillsSection: INITIAL_PORTFOLIO_DATA.skillsSection,
@@ -37,17 +35,12 @@ export async function getPortfolioDataAction(): Promise<PortfolioActionResult> {
       });
     }
 
-    let projects = await ProjectModel.find().sort({ createdAt: -1 }).lean();
-    if (isFirstInit && (!projects || projects.length === 0)) {
-      await ProjectModel.insertMany(INITIAL_PORTFOLIO_DATA.projectsSection.projects);
-      projects = await ProjectModel.find().sort({ createdAt: -1 }).lean();
-    }
+    // Automatically purge any remaining legacy dummy demo records
+    await ProjectModel.deleteMany({ id: { $in: DUMMY_PROJECT_IDS } });
+    await ArticleModel.deleteMany({ id: { $in: DUMMY_ARTICLE_IDS } });
 
+    let projects = await ProjectModel.find().sort({ featured: -1, createdAt: -1 }).lean();
     let articles = await ArticleModel.find().sort({ createdAt: -1 }).lean();
-    if (isFirstInit && (!articles || articles.length === 0)) {
-      await ArticleModel.insertMany(INITIAL_PORTFOLIO_DATA.articlesSection.articles);
-      articles = await ArticleModel.find().sort({ createdAt: -1 }).lean();
-    }
 
     const generalData = { ...configDoc.general };
     generalData.profileImage = sanitizeUrl(generalData.profileImage);

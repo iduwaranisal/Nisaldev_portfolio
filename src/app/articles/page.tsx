@@ -104,7 +104,7 @@ export default function ArticlesPage() {
           {filteredArticles.length === 0 ? (
             <div className="py-20 text-center rounded-3xl bg-white border border-stone-200 shadow-warm-sm space-y-3">
               <BookOpen className="w-10 h-10 text-slate-400 mx-auto" />
-              <h3 className="text-lg font-bold text-slate-800">No Publications Found</h3>
+              <h3 className="text-lg font-bold text-slate-800">No Articles Found</h3>
               <p className="text-sm text-slate-500">
                 Try adjusting your search query or topic filter.
               </p>

@@ -69,142 +69,151 @@ export default function ProjectShowcase() {
         </div>
 
         {/* Projects Responsive Grid (Max 6) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayedProjects.map((project) => (
-            <article
-              key={project.id}
-              className="group relative rounded-3xl bg-white border border-stone-200 hover:border-orange-300 overflow-hidden flex flex-col justify-between transition-all duration-200 shadow-warm-sm hover:shadow-warm-md hover:-translate-y-1"
-            >
-              {/* Project Image Container */}
-              <div
-                onClick={() => setSelectedProject(project)}
-                className="relative aspect-video w-full overflow-hidden bg-stone-100 cursor-pointer group/img"
+        {displayedProjects.length === 0 ? (
+          <div className="p-12 text-center rounded-3xl bg-white border border-stone-200 shadow-warm-sm max-w-xl mx-auto space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600 mx-auto">
+              <Cpu className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 font-display">Projects Coming Soon</h3>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              New project case studies are currently being curated. Check back soon or visit my GitHub profile to explore my active code repositories!
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayedProjects.map((project) => (
+              <article
+                key={project.id}
+                className="group relative rounded-3xl bg-white border border-stone-200 hover:border-orange-300 overflow-hidden flex flex-col justify-between transition-all duration-200 shadow-warm-sm hover:shadow-warm-md hover:-translate-y-1"
               >
-                {project.image && !project.image.includes("unsplash.com") ? (
-                  <Image
-                    src={project.image}
-                    alt={project.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover group-hover/img:scale-103 transition-transform duration-300 ease-out"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-orange-50 via-white to-amber-50 border-b border-stone-100 relative overflow-hidden">
-                    <div className="w-12 h-12 rounded-2xl bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-600 mb-2">
-                      <Cpu className="w-6 h-6" />
+                {/* Project Image Container */}
+                <div
+                  onClick={() => setSelectedProject(project)}
+                  className="relative aspect-video w-full overflow-hidden bg-stone-100 cursor-pointer group/img"
+                >
+                  {project.image && !project.image.includes("unsplash.com") ? (
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover group-hover/img:scale-103 transition-transform duration-300 ease-out"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-gradient-to-br from-orange-50 via-white to-amber-50 border-b border-stone-100 relative overflow-hidden">
+                      <div className="w-12 h-12 rounded-2xl bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-600 mb-2">
+                        <Cpu className="w-6 h-6" />
+                      </div>
+                      <span className="text-xs font-mono font-bold text-orange-700 uppercase tracking-wider">
+                        {project.category}
+                      </span>
                     </div>
-                    <span className="text-xs font-mono font-bold text-orange-700 uppercase tracking-wider">
+                  )}
+
+                  {/* Top Badge Overlay */}
+                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+                    <span className="px-2.5 py-0.5 rounded-full bg-white/90 border border-orange-200 text-[10px] font-mono font-bold text-orange-700 shadow-warm-sm backdrop-blur-md">
                       {project.category}
                     </span>
+                    {project.featured && (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-mono font-bold text-emerald-700">
+                        Featured
+                      </span>
+                    )}
                   </div>
-                )}
+                </div>
 
-                {/* Top Badge Overlay */}
-                <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-                  <span className="px-2.5 py-0.5 rounded-full bg-white/90 border border-orange-200 text-[10px] font-mono font-bold text-orange-700 shadow-warm-sm backdrop-blur-md">
-                    {project.category}
-                  </span>
-                  {project.featured && (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-mono font-bold text-emerald-700">
-                      Featured
-                    </span>
+                {/* Project Body */}
+                <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-2">
+                    <h3
+                      onClick={() => setSelectedProject(project)}
+                      className="text-lg font-bold text-slate-900 font-display group-hover:text-orange-600 transition-colors cursor-pointer line-clamp-1"
+                    >
+                      {project.title}
+                    </h3>
+                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                      {project.description}
+                    </p>
+                  </div>
+
+                  {/* Key Metrics Strip */}
+                  {project.metrics && project.metrics.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-stone-100">
+                      {project.metrics.slice(0, 2).map((m, i) => (
+                        <div key={i} className="p-2 rounded-xl bg-stone-50 border border-stone-100">
+                          <p className="text-[10px] text-slate-400 font-mono font-medium truncate">{m.label}</p>
+                          <p className="text-xs font-bold font-mono text-orange-600 truncate">{m.value}</p>
+                        </div>
+                      ))}
+                    </div>
                   )}
-                </div>
-              </div>
 
-              {/* Project Body */}
-              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                <div className="space-y-2">
-                  <h3
-                    onClick={() => setSelectedProject(project)}
-                    className="text-lg font-bold text-slate-900 font-display group-hover:text-orange-600 transition-colors cursor-pointer line-clamp-1"
-                  >
-                    {project.title}
-                  </h3>
-                  <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                    {project.description}
-                  </p>
-                </div>
-
-                {/* Key Metrics Strip */}
-                {project.metrics && project.metrics.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-stone-100">
-                    {project.metrics.slice(0, 2).map((m, i) => (
-                      <div key={i} className="p-2 rounded-xl bg-stone-50 border border-stone-100">
-                        <p className="text-[10px] text-slate-400 font-mono font-medium truncate">{m.label}</p>
-                        <p className="text-xs font-bold font-mono text-orange-600 truncate">{m.value}</p>
-                      </div>
+                  {/* Tech Tags */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.tags.slice(0, 4).map((tag, i) => (
+                      <span
+                        key={i}
+                        className="px-2.5 py-1 rounded-lg bg-stone-50 border border-stone-200/60 text-[10px] font-mono text-slate-600"
+                      >
+                        {tag}
+                      </span>
                     ))}
                   </div>
-                )}
 
-                {/* Tech Tags */}
-                <div className="flex flex-wrap gap-1.5">
-                  {project.tags.slice(0, 4).map((tag, i) => (
-                    <span
-                      key={i}
-                      className="px-2.5 py-1 rounded-lg bg-stone-50 border border-stone-200/60 text-[10px] font-mono text-slate-600"
+                  {/* Links & CTA Button */}
+                  <div className="flex items-center justify-between pt-3 border-t border-stone-100">
+                    <button
+                      onClick={() => setSelectedProject(project)}
+                      className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-orange-600 hover:text-orange-700 transition-colors cursor-pointer"
                     >
-                      {tag}
-                    </span>
-                  ))}
-                  {project.tags.length > 4 && (
-                    <span className="px-2 py-1 rounded-lg bg-stone-50 text-[10px] font-mono text-slate-500">
-                      +{project.tags.length - 4}
-                    </span>
-                  )}
-                </div>
+                      <span>Explore Details</span>
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </button>
 
-                {/* Action Bar */}
-                <div className="flex items-center justify-between pt-3 border-t border-stone-100">
-                  <button
-                    onClick={() => setSelectedProject(project)}
-                    className="inline-flex items-center gap-1 text-xs font-mono font-bold text-orange-600 hover:text-orange-700 transition-colors cursor-pointer"
-                  >
-                    <span>Case Study</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </button>
-
-                  <div className="flex items-center gap-2">
-                    {project.githubUrl && (
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 rounded-lg bg-stone-50 hover:bg-orange-50 text-slate-500 hover:text-orange-600 border border-stone-200 transition-colors"
-                        title="Source Code"
-                      >
-                        <GithubIcon className="w-4 h-4" />
-                      </a>
-                    )}
-                    {project.liveUrl && (
-                      <a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 rounded-lg bg-stone-50 hover:bg-orange-50 text-slate-500 hover:text-orange-600 border border-stone-200 transition-colors"
-                        title="Live Deployment"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {project.githubUrl && (
+                        <a
+                          href={project.githubUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 rounded-lg bg-stone-50 hover:bg-orange-50 text-slate-500 hover:text-orange-600 border border-stone-200 transition-colors"
+                          title="Source Code"
+                        >
+                          <GithubIcon className="w-4 h-4" />
+                        </a>
+                      )}
+                      {project.liveUrl && (
+                        <a
+                          href={project.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 rounded-lg bg-stone-50 hover:bg-orange-50 text-slate-500 hover:text-orange-600 border border-stone-200 transition-colors"
+                          title="Live Deployment"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))}
-        </div>
+              </article>
+            ))}
+          </div>
+        )}
 
         {/* See More Projects CTA Button */}
-        <div className="mt-12 flex justify-center">
-          <Link
-            href="/projects"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm text-white bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 shadow-warm-md hover:shadow-warm-lg hover:scale-102 transition-all duration-200 cursor-pointer"
-          >
-            <span>See All Projects ({projectsSection.projects.length})</span>
-            <ArrowUpRight className="w-4 h-4" />
-          </Link>
-        </div>
+        {projectsSection.projects.length > 0 && (
+          <div className="mt-12 flex justify-center">
+            <Link
+              href="/projects"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm text-white bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 shadow-warm-md hover:shadow-warm-lg hover:scale-102 transition-all duration-200 cursor-pointer"
+            >
+              <span>See All Projects ({projectsSection.projects.length})</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Case Study Full Modal */}

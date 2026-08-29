@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { usePortfolio } from "@/context/PortfolioContext";
+import { sendContactMessageAction } from "@/actions/contactActions";
 
 export default function ContactSection() {
   const { data } = usePortfolio();
@@ -37,15 +38,10 @@ export default function ContactSection() {
     setSubmitError("");
 
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const res = await sendContactMessageAction(formData);
 
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.error || "Unable to send message. Please try again.");
+      if (!res.success) {
+        throw new Error(res.error || "Unable to send message. Please try again.");
       }
 
       setSubmitted(true);

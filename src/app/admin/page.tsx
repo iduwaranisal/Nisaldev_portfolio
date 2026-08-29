@@ -40,6 +40,17 @@ import {
 import { usePortfolio } from "@/context/PortfolioContext";
 import { Project, Article } from "@/data/portfolioData";
 import { cn } from "@/lib/utils";
+import {
+  loginAdminAction,
+  logoutAdminAction,
+  verifyAdminSessionAction,
+} from "@/actions/authActions";
+import {
+  getContactMessagesAction,
+  deleteContactMessageAction,
+  ContactMessageItem,
+} from "@/actions/contactActions";
+import { uploadAssetAction } from "@/actions/uploadActions";
 
 type AdminTab =
   | "dashboard"
@@ -50,16 +61,6 @@ type AdminTab =
   | "inbox"
   | "contact"
   | "backup";
-
-interface ContactMessageItem {
-  _id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  createdAt: string;
-  isRead?: boolean;
-}
 
 export default function AdminPage() {
   const {
@@ -91,12 +92,19 @@ export default function AdminPage() {
 
   // Check saved session on mount
   useEffect(() => {
-    try {
-      const savedToken = localStorage.getItem("admin_auth_token_2026");
-      if (savedToken) {
-        setIsAuthenticated(true);
-      }
-    } catch {}
+    async function checkSession() {
+      try {
+        const savedToken = localStorage.getItem("admin_auth_token_2026");
+        if (savedToken) {
+          setIsAuthenticated(true);
+        }
+        const verifyRes = await verifyAdminSessionAction();
+        if (verifyRes.isValid) {
+          setIsAuthenticated(true);
+        }
+      } catch {}
+    }
+    checkSession();
   }, []);
 
   // Active Tab
@@ -208,13 +216,12 @@ export default function AdminPage() {
   const fetchMessages = useCallback(async () => {
     setLoadingMessages(true);
     try {
-      const res = await fetch("/api/contact");
-      const json = await res.json();
-      if (json.success && json.messages) {
-        setInboxMessages(json.messages);
+      const res = await getContactMessagesAction();
+      if (res.success && res.messages) {
+        setInboxMessages(res.messages);
       }
     } catch (err) {
-      console.error("Failed to fetch inquiries:", err);
+      console.error("Failed to fetch inquiries via Server Action:", err);
     } finally {
       setLoadingMessages(false);
     }
@@ -233,22 +240,16 @@ export default function AdminPage() {
     setAuthError("");
 
     try {
-      const res = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+      const res = await loginAdminAction({ username, password });
 
-      const json = await res.json();
-
-      if (res.ok && json.success && json.token) {
+      if (res.success && res.token) {
         setIsAuthenticated(true);
         try {
-          localStorage.setItem("admin_auth_token_2026", json.token);
+          localStorage.setItem("admin_auth_token_2026", res.token);
         } catch {}
         showToast("Authenticated. Welcome back!");
       } else {
-        setAuthError(json.error || "Invalid username or password credentials.");
+        setAuthError(res.error || "Invalid username or password credentials.");
       }
     } catch {
       setAuthError("Failed to connect to authentication gateway.");
@@ -257,12 +258,13 @@ export default function AdminPage() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsAuthenticated(false);
     setUsername("");
     setPassword("");
     try {
       localStorage.removeItem("admin_auth_token_2026");
+      await logoutAdminAction();
     } catch {}
     showToast("Logged out securely.");
   };
@@ -272,16 +274,12 @@ export default function AdminPage() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+    const res = await uploadAssetAction(formData);
 
-    const json = await res.json();
-    if (json.success && json.url) {
-      return json.url;
+    if (res.success && res.url) {
+      return res.url;
     }
-    throw new Error(json.error || "Upload failed");
+    throw new Error(res.error || "Upload failed");
   };
 
   if (!isAuthenticated) {
@@ -1719,9 +1717,13 @@ export default function AdminPage() {
                           <button
                             onClick={async () => {
                               if (confirm("Delete this message?")) {
-                                await fetch(`/api/contact?id=${msg._id}`, { method: "DELETE" });
-                                setInboxMessages((prev) => prev.filter((m) => m._id !== msg._id));
-                                showToast("Message removed.");
+                                const delRes = await deleteContactMessageAction(msg._id);
+                                if (delRes.success) {
+                                  setInboxMessages((prev) => prev.filter((m) => m._id !== msg._id));
+                                  showToast("Message removed.");
+                                } else {
+                                  alert(delRes.error || "Failed to delete message");
+                                }
                               }
                             }}
                             className="p-1.5 text-rose-500 hover:bg-rose-50 rounded cursor-pointer"

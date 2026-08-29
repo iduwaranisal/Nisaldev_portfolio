@@ -1,4 +1,6 @@
-import { NextResponse } from "next/server";
+"use server";
+
+import { revalidatePath } from "next/cache";
 import { connectToDatabase } from "@/lib/mongodb";
 import { PortfolioConfig } from "@/models/PortfolioConfig";
 import { ProjectModel } from "@/models/Project";
@@ -11,12 +13,19 @@ function sanitizeUrl(url?: string): string {
   return url;
 }
 
-export async function GET() {
+export interface PortfolioActionResult {
+  success: boolean;
+  data?: PortfolioData;
+  message?: string;
+  error?: string;
+}
+
+export async function getPortfolioDataAction(): Promise<PortfolioActionResult> {
   try {
     await connectToDatabase();
 
     let isFirstInit = false;
-    let configDoc = await PortfolioConfig.findOne();
+    let configDoc = await PortfolioConfig.findOne().lean();
     if (!configDoc) {
       isFirstInit = true;
       configDoc = await PortfolioConfig.create({
@@ -28,28 +37,24 @@ export async function GET() {
       });
     }
 
-    // Find or seed projects only on first initial setup
-    let projects = await ProjectModel.find().sort({ createdAt: -1 });
+    let projects = await ProjectModel.find().sort({ createdAt: -1 }).lean();
     if (isFirstInit && (!projects || projects.length === 0)) {
       await ProjectModel.insertMany(INITIAL_PORTFOLIO_DATA.projectsSection.projects);
-      projects = await ProjectModel.find().sort({ createdAt: -1 });
+      projects = await ProjectModel.find().sort({ createdAt: -1 }).lean();
     }
 
-    // Find or seed articles only on first initial setup
-    let articles = await ArticleModel.find().sort({ createdAt: -1 });
+    let articles = await ArticleModel.find().sort({ createdAt: -1 }).lean();
     if (isFirstInit && (!articles || articles.length === 0)) {
       await ArticleModel.insertMany(INITIAL_PORTFOLIO_DATA.articlesSection.articles);
-      articles = await ArticleModel.find().sort({ createdAt: -1 });
+      articles = await ArticleModel.find().sort({ createdAt: -1 }).lean();
     }
 
-    // Sanitize general config
     const generalData = { ...configDoc.general };
     generalData.profileImage = sanitizeUrl(generalData.profileImage);
 
-    // Format unified response
     const fullData: PortfolioData = {
       general: generalData,
-      skillsSection: configDoc.skillsSection,
+      skillsSection: configDoc.skillsSection || INITIAL_PORTFOLIO_DATA.skillsSection,
       projectsSection: {
         subBadge: INITIAL_PORTFOLIO_DATA.projectsSection.subBadge,
         titleMain: INITIAL_PORTFOLIO_DATA.projectsSection.titleMain,
@@ -57,7 +62,7 @@ export async function GET() {
         titleEnd: INITIAL_PORTFOLIO_DATA.projectsSection.titleEnd,
         description: INITIAL_PORTFOLIO_DATA.projectsSection.description,
         categories: INITIAL_PORTFOLIO_DATA.projectsSection.categories,
-        projects: projects.map((p) => ({
+        projects: (projects || []).map((p) => ({
           id: p.id,
           title: p.title,
           category: p.category,
@@ -79,7 +84,7 @@ export async function GET() {
         titleAccent: INITIAL_PORTFOLIO_DATA.articlesSection.titleAccent,
         titleEnd: INITIAL_PORTFOLIO_DATA.articlesSection.titleEnd,
         description: INITIAL_PORTFOLIO_DATA.articlesSection.description,
-        articles: articles.map((a) => ({
+        articles: (articles || []).map((a) => ({
           id: a.id,
           title: a.title,
           category: a.category,
@@ -91,41 +96,46 @@ export async function GET() {
           tags: a.tags,
         })),
       },
-      contactSection: configDoc.contactSection,
-      socialLinks: configDoc.socialLinks,
-      footer: configDoc.footer,
+      contactSection: configDoc.contactSection || INITIAL_PORTFOLIO_DATA.contactSection,
+      socialLinks: configDoc.socialLinks || INITIAL_PORTFOLIO_DATA.socialLinks,
+      footer: configDoc.footer || INITIAL_PORTFOLIO_DATA.footer,
     };
 
-    return NextResponse.json({ success: true, data: fullData });
+    return { success: true, data: fullData };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Database connection failed";
-    console.error("API GET /api/portfolio error:", error);
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    console.error("getPortfolioDataAction error:", error);
+    return { success: false, error: message };
   }
 }
 
-export async function PUT(req: Request) {
+export async function updatePortfolioConfigAction(
+  fields: Partial<PortfolioData>
+): Promise<{ success: boolean; message?: string; error?: string }> {
   try {
     await connectToDatabase();
-    const body = await req.json();
 
     let configDoc = await PortfolioConfig.findOne();
     if (!configDoc) {
-      configDoc = new PortfolioConfig(body);
+      configDoc = new PortfolioConfig(fields);
     } else {
-      if (body.general) configDoc.general = body.general;
-      if (body.skillsSection) configDoc.skillsSection = body.skillsSection;
-      if (body.contactSection) configDoc.contactSection = body.contactSection;
-      if (body.socialLinks) configDoc.socialLinks = body.socialLinks;
-      if (body.footer) configDoc.footer = body.footer;
+      if (fields.general) configDoc.general = fields.general;
+      if (fields.skillsSection) configDoc.skillsSection = fields.skillsSection;
+      if (fields.contactSection) configDoc.contactSection = fields.contactSection;
+      if (fields.socialLinks) configDoc.socialLinks = fields.socialLinks;
+      if (fields.footer) configDoc.footer = fields.footer;
     }
 
     await configDoc.save();
 
-    return NextResponse.json({ success: true, message: "Configuration updated in MongoDB Atlas" });
+    // Revalidate paths to update static/cached pages immediately
+    revalidatePath("/", "layout");
+    revalidatePath("/");
+
+    return { success: true, message: "Configuration updated in MongoDB Atlas" };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to update configuration";
-    console.error("API PUT /api/portfolio error:", error);
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    console.error("updatePortfolioConfigAction error:", error);
+    return { success: false, error: message };
   }
 }

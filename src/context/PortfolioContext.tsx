@@ -9,6 +9,21 @@ import {
   BentoConfig,
 } from "@/data/portfolioData";
 
+import {
+  getPortfolioDataAction,
+  updatePortfolioConfigAction,
+} from "@/actions/portfolioActions";
+import {
+  addProjectAction,
+  updateProjectAction,
+  deleteProjectAction,
+} from "@/actions/projectActions";
+import {
+  addArticleAction,
+  updateArticleAction,
+  deleteArticleAction,
+} from "@/actions/articleActions";
+
 interface PortfolioContextType {
   data: PortfolioData;
   isLoaded: boolean;
@@ -76,22 +91,19 @@ export function PortfolioProvider({
   const fetchFromApi = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/portfolio", { cache: "no-store" });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && json.data) {
-          const clean = sanitizeData(json.data);
-          setData(clean);
-          setIsDbConnected(true);
-          try {
-            localStorage.setItem("nisaldev_portfolio_cms_data_2026", JSON.stringify(clean));
-          } catch {}
-          return;
-        }
+      const res = await getPortfolioDataAction();
+      if (res.success && res.data) {
+        const clean = sanitizeData(res.data);
+        setData(clean);
+        setIsDbConnected(true);
+        try {
+          localStorage.setItem("nisaldev_portfolio_cms_data_2026", JSON.stringify(clean));
+        } catch {}
+        return;
       }
-      throw new Error("API returned non-success");
+      throw new Error(res.error || "Failed to fetch portfolio data");
     } catch (err) {
-      console.warn("Failed to fetch from MongoDB API, using cached fallback:", err);
+      console.warn("Failed to fetch from MongoDB Server Action, using cached fallback:", err);
       try {
         const saved = localStorage.getItem("nisaldev_portfolio_cms_data_2026");
         if (saved) {
@@ -115,17 +127,16 @@ export function PortfolioProvider({
     setData(clean);
     try {
       localStorage.setItem("nisaldev_portfolio_cms_data_2026", JSON.stringify(clean));
-      await fetch("/api/portfolio", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          general: clean.general,
-          skillsSection: clean.skillsSection,
-          contactSection: clean.contactSection,
-          socialLinks: clean.socialLinks,
-          footer: clean.footer,
-        }),
+      const res = await updatePortfolioConfigAction({
+        general: clean.general,
+        skillsSection: clean.skillsSection,
+        contactSection: clean.contactSection,
+        socialLinks: clean.socialLinks,
+        footer: clean.footer,
       });
+      if (!res.success) {
+        throw new Error(res.error || "Failed to update configuration");
+      }
     } catch (err) {
       console.error("Failed to sync config to MongoDB:", err);
     }
@@ -185,13 +196,9 @@ export function PortfolioProvider({
     });
 
     try {
-      const res = await fetch("/api/projects", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(project),
-      });
-      if (!res.ok) {
-        throw new Error(`API error: ${res.statusText}`);
+      const res = await addProjectAction(project);
+      if (!res.success) {
+        throw new Error(res.error || "Server action failed to add project");
       }
     } catch (err) {
       console.error("Failed to add project to MongoDB:", err);
@@ -219,13 +226,9 @@ export function PortfolioProvider({
     });
 
     try {
-      const res = await fetch(`/api/projects/${encodeURIComponent(id)}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedFields),
-      });
-      if (!res.ok) {
-        throw new Error(`API error: ${res.statusText}`);
+      const res = await updateProjectAction(id, updatedFields);
+      if (!res.success) {
+        throw new Error(res.error || "Server action failed to update project");
       }
     } catch (err) {
       console.error("Failed to update project in MongoDB:", err);
@@ -251,11 +254,9 @@ export function PortfolioProvider({
     });
 
     try {
-      const res = await fetch(`/api/projects/${encodeURIComponent(id)}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        throw new Error(`API error: ${res.statusText}`);
+      const res = await deleteProjectAction(id);
+      if (!res.success) {
+        throw new Error(res.error || "Server action failed to delete project");
       }
     } catch (err) {
       console.error("Failed to delete project from MongoDB:", err);
@@ -293,13 +294,9 @@ export function PortfolioProvider({
     });
 
     try {
-      const res = await fetch("/api/articles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(article),
-      });
-      if (!res.ok) {
-        throw new Error(`API error: ${res.statusText}`);
+      const res = await addArticleAction(article);
+      if (!res.success) {
+        throw new Error(res.error || "Server action failed to add article");
       }
     } catch (err) {
       console.error("Failed to add article to MongoDB:", err);
@@ -327,13 +324,9 @@ export function PortfolioProvider({
     });
 
     try {
-      const res = await fetch(`/api/articles/${encodeURIComponent(id)}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedFields),
-      });
-      if (!res.ok) {
-        throw new Error(`API error: ${res.statusText}`);
+      const res = await updateArticleAction(id, updatedFields);
+      if (!res.success) {
+        throw new Error(res.error || "Server action failed to update article");
       }
     } catch (err) {
       console.error("Failed to update article in MongoDB:", err);
@@ -359,11 +352,9 @@ export function PortfolioProvider({
     });
 
     try {
-      const res = await fetch(`/api/articles/${encodeURIComponent(id)}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        throw new Error(`API error: ${res.statusText}`);
+      const res = await deleteArticleAction(id);
+      if (!res.success) {
+        throw new Error(res.error || "Server action failed to delete article");
       }
     } catch (err) {
       console.error("Failed to delete article from MongoDB:", err);

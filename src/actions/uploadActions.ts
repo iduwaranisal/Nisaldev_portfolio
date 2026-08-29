@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+"use server";
+
 import cloudinary from "@/lib/cloudinary";
 
 const ALLOWED_MIME_TYPES = [
@@ -11,31 +12,39 @@ const ALLOWED_MIME_TYPES = [
   "application/pdf",
 ];
 
-const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB limit for PDFs and High-Res Assets
+const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB maximum limit
 
-export async function POST(req: Request) {
+export interface UploadActionResult {
+  success: boolean;
+  url?: string;
+  publicId?: string;
+  format?: string;
+  bytes?: number;
+  error?: string;
+}
+
+export async function uploadAssetAction(formData: FormData): Promise<UploadActionResult> {
   try {
-    const formData = await req.formData();
-    const file = formData.get("file") as File | null;
+    if (!formData) {
+      return { success: false, error: "No form data provided" };
+    }
 
+    const file = formData.get("file") as File | null;
     if (!file) {
-      return NextResponse.json({ success: false, error: "No file provided" }, { status: 400 });
+      return { success: false, error: "No file provided in upload" };
     }
 
     // Validate MIME type
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { success: false, error: "Invalid file type. Allowed: JPEG, PNG, WebP, AVIF, GIF, SVG, PDF" },
-        { status: 400 }
-      );
+      return {
+        success: false,
+        error: "Invalid file type. Allowed: JPEG, PNG, WebP, AVIF, GIF, SVG, PDF",
+      };
     }
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      return NextResponse.json(
-        { success: false, error: "File exceeds 25MB maximum upload limit" },
-        { status: 400 }
-      );
+      return { success: false, error: "File exceeds 25MB maximum upload limit" };
     }
 
     const isPdf = file.type === "application/pdf";
@@ -45,22 +54,22 @@ export async function POST(req: Request) {
     const buffer = Buffer.from(bytes);
     const base64Data = `data:${file.type};base64,${buffer.toString("base64")}`;
 
-    // Upload to Cloudinary with appropriate resource_type
+    // Upload to Cloudinary
     const uploadResponse = await cloudinary.uploader.upload(base64Data, {
       folder: "nisal_portfolio_2026",
       resource_type: isPdf ? "raw" : "image",
     });
 
-    return NextResponse.json({
+    return {
       success: true,
       url: uploadResponse.secure_url,
       publicId: uploadResponse.public_id,
       format: uploadResponse.format || (isPdf ? "pdf" : "auto"),
       bytes: uploadResponse.bytes,
-    });
+    };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Failed to upload asset";
-    console.error("Upload error:", error);
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    console.error("uploadAssetAction error:", error);
+    return { success: false, error: message };
   }
 }

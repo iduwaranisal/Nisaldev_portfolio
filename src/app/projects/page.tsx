@@ -59,15 +59,15 @@ export default function ProjectsPage() {
             <div className="space-y-4 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-orange-700 text-xs font-mono font-bold">
                 <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-                <span>Complete Projects Archive</span>
+                <span>All Projects</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 font-display tracking-tight leading-tight">
-                Architectural <span className="text-gradient-orange">Case Studies</span> & Systems
+                Featured <span className="text-gradient-orange">Projects</span> & Applications
               </h1>
 
               <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                Explore the complete production catalog of autonomous multi-agent swarms, low-latency AI inference runtimes, and distributed web platforms.
+                Explore the complete collection of web applications, AI tools, and full-stack software projects.
               </p>
             </div>
 

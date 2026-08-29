@@ -546,10 +546,10 @@ export default function AdminPage() {
             {[
               { id: "dashboard", label: "Overview", icon: LayoutDashboard },
               { id: "general", label: "Hero & Identity", icon: User },
-              { id: "bento", label: "Skills & Architecture", icon: Brain },
+              { id: "bento", label: "Skills & Technical Stack", icon: Brain },
               { id: "projects", label: "Projects Portfolio", icon: FolderGit2 },
               { id: "articles", label: "Technical Articles", icon: BookOpen },
-              { id: "inbox", label: "Inbound Inquiries", icon: Inbox },
+              { id: "inbox", label: "Inbound Messages", icon: Inbox },
               { id: "contact", label: "Contact & Resume", icon: Mail },
               { id: "backup", label: "System Backup", icon: Database },
             ].map((tab) => {
@@ -848,7 +848,7 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* TAB 3: SKILLS & ARCHITECTURE CARDS */}
+          {/* TAB 3: SKILLS & TECHNICAL CARDS */}
           {activeTab === "bento" && (
             <div className="space-y-8">
               {/* Header & Section Title Controls */}
@@ -856,10 +856,10 @@ export default function AdminPage() {
                 <div>
                   <h1 className="text-2xl font-bold text-slate-900 font-display flex items-center gap-2">
                     <BrainCircuit className="w-6 h-6 text-orange-600" />
-                    <span>Skills & Architecture Cards</span>
+                    <span>Skills & Technical Cards</span>
                   </h1>
                   <p className="text-xs text-slate-500">
-                    Add, edit, delete, and resize technical skill cards in an equal-sized, fully customizable grid.
+                    Add, edit, delete, and customize technical skill cards in an equal-sized, responsive grid.
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -938,7 +938,7 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <h3 className="text-base font-bold text-slate-900 font-display">
-                      Architecture Cards Arsenal
+                      Skills & Technical Cards
                     </h3>
                     <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-mono font-bold">
                       {getSkillsCards(data.skillsSection).length} Cards Active
@@ -1428,16 +1428,16 @@ export default function AdminPage() {
                       id: `proj-${Date.now()}`,
                       title: "New Architectural Project",
                       category: "AI & Agents",
-                      tagline: "High-performance intelligent system architecture.",
-                      description: "Brief summary of the system capabilities and purpose.",
-                      fullOverview: "Detailed architectural breakdown covering technical decisions, low-latency pipelines, and production outcomes.",
+                      tagline: "Modern web application and AI assistant.",
+                      description: "Brief summary of the application features and technologies used.",
+                      fullOverview: "Detailed breakdown of the application architecture, technical decisions, and features.",
                       image: "",
                       tags: ["Next.js 16", "Python", "PyTorch"],
                       metrics: [
-                        { label: "Performance", value: "<35ms" },
-                        { label: "Throughput", value: "3.2k tok/s" },
+                        { label: "Performance", value: "Fast" },
+                        { label: "Accuracy", value: "95%" },
                       ],
-                      architectureDetails: ["Dynamic workflow orchestration", "Vector recall caching"],
+                      architectureDetails: ["Step-by-step workflow planning", "Vector search integration"],
                       liveUrl: "",
                       githubUrl: "",
                       featured: false,
@@ -1713,23 +1713,23 @@ export default function AdminPage() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-900 font-display">Technical Publications</h1>
-                  <p className="text-xs text-slate-500">Compose, publish, and manage architectural articles.</p>
+                  <h1 className="text-2xl font-bold text-slate-900 font-display">Technical Articles</h1>
+                  <p className="text-xs text-slate-500">Write, publish, and manage technical articles and guides.</p>
                 </div>
                 <button
                   onClick={() => {
                     const newArt: Article = {
                       id: `art-${Date.now()}`,
-                      title: "New Architectural Publication",
-                      category: "AI Systems",
-                      readTime: "7 min read",
+                      title: "New Technical Article",
+                      category: "AI & Web",
+                      readTime: "5 min read",
                       publishedDate: "Feb 2026",
                       slug: `article-${Date.now()}`,
-                      tags: ["AI", "Architecture", "Engineering"],
-                      excerpt: "Executive summary and core architectural takeaways.",
+                      tags: ["Web Development", "AI", "Software"],
+                      excerpt: "Brief summary and key takeaways of the article.",
                       content: [
-                        "Paragraph 1 introducing the technical domain and architectural hypothesis.",
-                        "Paragraph 2 presenting benchmark metrics, latency analyses, and implementation insights.",
+                        "Introduction to the technical topic and why it matters.",
+                        "Step-by-step breakdown with code examples and best practices.",
                       ],
                     };
                     setEditingArticle(newArt);

@@ -58,15 +58,15 @@ export default function ArticlesPage() {
             <div className="space-y-4 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-orange-700 text-xs font-mono font-bold">
                 <BookOpen className="w-3.5 h-3.5 text-orange-500" />
-                <span>Publications & Research Archive</span>
+                <span>Articles & Guides</span>
               </div>
 
               <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 font-display tracking-tight leading-tight">
-                Technical <span className="text-gradient-orange">Publications</span> & Research
+                Technical <span className="text-gradient-orange">Articles</span> & Guides
               </h1>
 
               <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                In-depth architectural breakdowns, benchmarks, multi-agent orchestrations, and distributed engineering insights.
+                Practical guides and tutorials on building AI applications, modern web development, and database architecture.
               </p>
             </div>
 

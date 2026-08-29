@@ -23,7 +23,7 @@ export default function ContactSection() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    subject: "AI & Full Stack Architecture",
+    subject: "Project Inquiry / Collaboration",
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,7 +56,7 @@ export default function ContactSection() {
         });
       } catch {}
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Transmission failed";
+      const msg = err instanceof Error ? err.message : "Failed to send message";
       setSubmitError(msg);
     } finally {
       setIsSubmitting(false);
@@ -127,7 +127,7 @@ export default function ContactSection() {
                 </div>
                 <a
                   href={contactSection.resumePdfUrl || "/resume.pdf"}
-                  download="Resume_AI_Architect.pdf"
+                  download="Resume_Iduwara_Nisal.pdf"
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm hover:shadow-warm-md hover:scale-102 transition-all duration-200 shrink-0 cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
@@ -145,10 +145,10 @@ export default function ContactSection() {
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
                 <h3 className="text-2xl font-bold text-slate-900 font-display">
-                  Message Dispatched Successfully!
+                  Message Sent Successfully!
                 </h3>
                 <p className="text-sm text-slate-600 max-w-md">
-                  Thank you for reaching out, {formData.name}. Your inquiry has been received. I will review your project brief and get back to you within 24 hours.
+                  Thank you for reaching out, {formData.name}. Your message has been received and I will get back to you shortly.
                 </p>
                 <button
                   onClick={() => {
@@ -156,13 +156,13 @@ export default function ContactSection() {
                     setFormData({
                       name: "",
                       email: "",
-                      subject: "AI & Full Stack Architecture",
+                      subject: "Project Inquiry / Collaboration",
                       message: "",
                     });
                   }}
                   className="mt-4 px-6 py-2.5 rounded-xl bg-stone-100 border border-stone-200 text-xs font-mono font-bold text-slate-700 hover:text-slate-950 transition-colors cursor-pointer"
                 >
-                  Send Another Inquiry
+                  Send Another Message
                 </button>
               </div>
             ) : (

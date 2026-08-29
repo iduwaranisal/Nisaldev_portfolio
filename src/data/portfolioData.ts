@@ -31,6 +31,31 @@ export interface Article {
   tags: string[];
 }
 
+export type SkillCardTheme = "orange" | "amber" | "rose" | "blue" | "emerald" | "purple";
+
+export interface SkillBar {
+  name: string;
+  level: string;
+}
+
+export interface MetricItem {
+  label: string;
+  value: string;
+}
+
+export interface SkillCard {
+  id: string;
+  title: string;
+  badge?: string;
+  icon?: string;
+  theme?: SkillCardTheme;
+  description: string;
+  tags?: string[];
+  skillBars?: SkillBar[];
+  metrics?: MetricItem[];
+  principles?: string[];
+}
+
 export interface SkillItem {
   name: string;
   level: string;
@@ -95,7 +120,8 @@ export interface PortfolioData {
     titleAccent: string;
     titleEnd: string;
     description: string;
-    bento: BentoConfig;
+    cards?: SkillCard[];
+    bento?: BentoConfig;
   };
   projectsSection: {
     subBadge: string;
@@ -170,10 +196,13 @@ export const INITIAL_PORTFOLIO_DATA: PortfolioData = {
     titleAccent: "Skills",
     titleEnd: "& Architecture",
     description: "I enjoy building the entire product rather than just training the AI—from setting up the database to creating the user interface and getting the application live on the internet. Always happy to connect and chat about software design, practical AI, and new technical ideas.",
-    bento: {
-      bento1: {
-        badge: "Machine Learning & AI",
-        title: "Artificial Intelligence",
+    cards: [
+      {
+        id: "card-ai",
+        title: "Artificial Intelligence & LLMs",
+        badge: "Core Specialization",
+        icon: "BrainCircuit",
+        theme: "orange",
         description: "I work with tools like PyTorch, large language models (Hugging Face, LangChain), and vector databases to create smart, data-driven features.",
         tags: [
           "PyTorch & Deep Learning",
@@ -183,43 +212,94 @@ export const INITIAL_PORTFOLIO_DATA: PortfolioData = {
           "Vector Databases & Embeddings",
           "Data-Driven AI Features",
         ],
-        metric1Label: "Core AI Frameworks",
-        metric1Value: "PyTorch & LangChain",
-        metric2Label: "Models & Data",
-        metric2Value: "Hugging Face & Vectors",
+        metrics: [
+          { label: "Core Frameworks", value: "PyTorch & LangChain" },
+          { label: "Model Architecture", value: "Transformers & RAG" },
+        ],
       },
-      bento2: {
-        badge: "Full-Stack Web",
-        title: "Web Development",
-        description: "I build complete, interactive applications using Python (Django), Next.js, and the MERN stack.",
+      {
+        id: "card-web",
+        title: "Full-Stack Web Development",
+        badge: "Interactive Apps",
+        icon: "Layers",
+        theme: "amber",
+        description: "I build complete, interactive applications using Python (Django), Next.js, and the MERN stack with modern responsive UIs.",
+        tags: [
+          "Next.js 16 (App Router)",
+          "Python (Django)",
+          "MERN Stack",
+          "TypeScript",
+          "Tailwind CSS",
+          "React 19",
+        ],
         skillBars: [
           { name: "Next.js 16 & React", level: "96%" },
           { name: "Python (Django)", level: "92%" },
-          { name: "MERN Stack (MongoDB, Express, React, Node)", level: "94%" },
-          { name: "TypeScript & Tailwind CSS", level: "95%" },
+          { name: "MERN Stack (MongoDB, Node, Express)", level: "94%" },
+          { name: "TypeScript & Modern UI", level: "95%" },
         ],
-        metricLabel: "Interactive Architecture",
-        metricValue: "Next.js · Django · MERN",
       },
-      bento3: {
+      {
+        id: "card-devops",
         title: "Deployment & Operations",
+        badge: "Cloud & Reliability",
+        icon: "Server",
+        theme: "orange",
         description: "I make sure these applications run smoothly and reliably online using Linux, Docker, Kubernetes, and automated release processes (CI/CD).",
-        tags: ["Linux Administration", "Docker Containers", "Kubernetes (K8s)", "CI/CD Pipelines", "Automated Releases", "Cloud Infrastructure"],
+        tags: [
+          "Linux Administration",
+          "Docker Containers",
+          "Kubernetes (K8s)",
+          "CI/CD Pipelines",
+          "Automated Releases",
+          "Cloud Infrastructure",
+        ],
+        principles: [
+          "Automated CI/CD release workflows",
+          "Containerized isolation & portability",
+          "Zero-downtime rolling updates",
+        ],
       },
-      bento4: {
-        title: "Databases & Vector Stores",
+      {
+        id: "card-databases",
+        title: "Databases & Vector Storage",
+        badge: "High Throughput",
+        icon: "Database",
+        theme: "amber",
         description: "Designing end-to-end data persistence layers with vector search, relational modeling, and high-speed document stores.",
-        tags: ["Vector Databases", "MongoDB", "PostgreSQL", "Redis", "Django ORM", "Mongoose"],
+        tags: [
+          "Vector Databases (Qdrant/Pinecone)",
+          "MongoDB Atlas",
+          "PostgreSQL",
+          "Redis In-Memory Cache",
+          "Django ORM",
+          "Mongoose",
+        ],
+        metrics: [
+          { label: "Vector Search", value: "Sub-15ms Recall" },
+          { label: "Data Modeling", value: "ACID & NoSQL" },
+        ],
       },
-      bento5: {
+      {
+        id: "card-principles",
         title: "Engineering Philosophy",
+        badge: "System Architecture",
+        icon: "Workflow",
+        theme: "rose",
+        description: "Connecting hands-on machine learning with dependable software engineering and clean architectural patterns.",
+        tags: [
+          "End-to-End Ownership",
+          "Type Safety",
+          "Modular Microservices",
+          "Production Telemetry",
+        ],
         principles: [
           "End-to-End Product Lifecycle Ownership",
           "Connecting ML with Reliable Software Engineering",
           "Automated CI/CD & Resilient Cloud Deployments",
         ],
       },
-    },
+    ],
   },
   projectsSection: {
     subBadge: "Featured Innovations",
@@ -474,3 +554,79 @@ export const INITIAL_PORTFOLIO_DATA: PortfolioData = {
     creditsText: "Engineered with Next.js 16 · TypeScript · Tailwind CSS · Distributed Systems",
   },
 };
+
+export function getSkillsCards(skillsSection?: any): SkillCard[] {
+  if (!skillsSection) return INITIAL_PORTFOLIO_DATA.skillsSection.cards || [];
+  if (Array.isArray(skillsSection.cards) && skillsSection.cards.length > 0) {
+    return skillsSection.cards.map((c: any) => ({
+      id: c.id || `card-${Math.random()}`,
+      title: c.title || "Specialization",
+      badge: c.badge || "",
+      icon: c.icon || "BrainCircuit",
+      theme: (c.theme as SkillCardTheme) || "orange",
+      description: c.description || "",
+      tags: Array.isArray(c.tags) ? c.tags : [],
+      skillBars: Array.isArray(c.skillBars) ? c.skillBars : [],
+      metrics: Array.isArray(c.metrics) ? c.metrics : [],
+      principles: Array.isArray(c.principles) ? c.principles : [],
+    }));
+  }
+  if (skillsSection.bento) {
+    const b = skillsSection.bento;
+    return [
+      {
+        id: "card-ai",
+        title: b.bento1?.title || "Artificial Intelligence",
+        badge: b.bento1?.badge || "Core Specialization",
+        icon: "BrainCircuit",
+        theme: "orange",
+        description: b.bento1?.description || "",
+        tags: b.bento1?.tags || [],
+        metrics: [
+          { label: b.bento1?.metric1Label || "Frameworks", value: b.bento1?.metric1Value || "PyTorch" },
+          { label: b.bento1?.metric2Label || "Models", value: b.bento1?.metric2Value || "Transformers" },
+        ],
+      },
+      {
+        id: "card-web",
+        title: b.bento2?.title || "Web Development",
+        badge: b.bento2?.badge || "Interactive Apps",
+        icon: "Layers",
+        theme: "amber",
+        description: b.bento2?.description || "",
+        tags: ["Next.js 16", "Python (Django)", "MERN Stack", "TypeScript"],
+        skillBars: b.bento2?.skillBars || [],
+      },
+      {
+        id: "card-devops",
+        title: b.bento3?.title || "Deployment & Operations",
+        badge: "Infrastructure",
+        icon: "Server",
+        theme: "orange",
+        description: b.bento3?.description || "",
+        tags: b.bento3?.tags || [],
+        principles: ["Automated CI/CD releases", "Containerized microservices", "Zero-downtime deployments"],
+      },
+      {
+        id: "card-databases",
+        title: b.bento4?.title || "Databases & Storage",
+        badge: "High Throughput",
+        icon: "Database",
+        theme: "amber",
+        description: b.bento4?.description || "",
+        tags: b.bento4?.tags || [],
+        metrics: [{ label: "Persistence", value: "Vector & Relational" }, { label: "Caching", value: "Redis & Memory" }],
+      },
+      {
+        id: "card-principles",
+        title: b.bento5?.title || "Engineering Philosophy",
+        badge: "Architecture",
+        icon: "Workflow",
+        theme: "rose",
+        description: "Connecting machine learning with reliable software development and end-to-end product ownership.",
+        principles: b.bento5?.principles || [],
+      },
+    ];
+  }
+  return INITIAL_PORTFOLIO_DATA.skillsSection.cards || [];
+}

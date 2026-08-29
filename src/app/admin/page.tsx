@@ -36,9 +36,27 @@ import {
   KeyRound,
   ShieldCheck,
   FileText,
+  BrainCircuit,
+  Cpu,
+  Code2,
+  Terminal,
+  Globe,
+  Cloud,
+  Zap,
+  Activity,
+  GitBranch,
+  Bot,
+  Boxes,
+  Copy,
 } from "lucide-react";
 import { usePortfolio } from "@/context/PortfolioContext";
-import { Project, Article } from "@/data/portfolioData";
+import {
+  Project,
+  Article,
+  SkillCard,
+  SkillCardTheme,
+  getSkillsCards,
+} from "@/data/portfolioData";
 import { cn } from "@/lib/utils";
 import {
   loginAdminAction,
@@ -62,6 +80,35 @@ type AdminTab =
   | "contact"
   | "backup";
 
+const AVAILABLE_ICONS = [
+  { name: "BrainCircuit", label: "AI & Neural" },
+  { name: "Layers", label: "Full Stack & Web" },
+  { name: "Server", label: "DevOps & Infrastructure" },
+  { name: "Database", label: "Databases & Vector Storage" },
+  { name: "Workflow", label: "System Architecture" },
+  { name: "Cpu", label: "Compute & Hardware" },
+  { name: "Code2", label: "Clean Code & Logic" },
+  { name: "ShieldCheck", label: "Security & Auth" },
+  { name: "Terminal", label: "CLI & Linux Admin" },
+  { name: "Globe", label: "Web & Distributed" },
+  { name: "Cloud", label: "Cloud & Microservices" },
+  { name: "Sparkles", label: "Innovation & Features" },
+  { name: "Zap", label: "Low Latency & Speed" },
+  { name: "Activity", label: "Telemetry & Performance" },
+  { name: "GitBranch", label: "CI/CD & Git Pipelines" },
+  { name: "Bot", label: "Autonomous Agent Swarms" },
+  { name: "Boxes", label: "Modular Systems" },
+];
+
+const AVAILABLE_THEMES: { id: SkillCardTheme; label: string; bg: string; text: string }[] = [
+  { id: "orange", label: "Orange (Signature)", bg: "bg-orange-500", text: "text-orange-700" },
+  { id: "amber", label: "Amber (Warm)", bg: "bg-amber-500", text: "text-amber-700" },
+  { id: "rose", label: "Rose (Accent)", bg: "bg-rose-500", text: "text-rose-700" },
+  { id: "blue", label: "Blue (Tech)", bg: "bg-blue-500", text: "text-blue-700" },
+  { id: "emerald", label: "Emerald (System)", bg: "bg-emerald-500", text: "text-emerald-700" },
+  { id: "purple", label: "Purple (Future/AI)", bg: "bg-purple-500", text: "text-purple-700" },
+];
+
 export default function AdminPage() {
   const {
     data,
@@ -69,6 +116,10 @@ export default function AdminPage() {
     refreshData,
     updateGeneral,
     updateSkillsSection,
+    updateSkillsCards,
+    addSkillCard,
+    updateSkillCard,
+    deleteSkillCard,
     updateBentoConfig,
     addProject,
     updateProject,
@@ -124,11 +175,11 @@ export default function AdminPage() {
   // Articles State for Edit Modal
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
 
-  // Temp tag inputs for Bento
-  const [newBento1Tag, setNewBento1Tag] = useState("");
-  const [newBento3Tag, setNewBento3Tag] = useState("");
-  const [newBento4Tag, setNewBento4Tag] = useState("");
-  const [newBento5Principle, setNewBento5Principle] = useState("");
+  // Skills & Architecture Card State for Edit Modal
+  const [editingSkillCard, setEditingSkillCard] = useState<SkillCard | null>(null);
+  const [isSavingSkillCard, setIsSavingSkillCard] = useState(false);
+  const [newCardTag, setNewCardTag] = useState("");
+  const [newCardPrinciple, setNewCardPrinciple] = useState("");
 
   // Uploading States
   const [isUploadingProfile, setIsUploadingProfile] = useState(false);
@@ -211,6 +262,82 @@ export default function AdminPage() {
         alert(`Delete failed: ${msg}`);
       }
     }
+  };
+
+  const handleCreateNewSkillCard = () => {
+    const newCard: SkillCard = {
+      id: `card-${Date.now()}`,
+      title: "New Technical Specialization",
+      badge: "Architecture",
+      icon: "BrainCircuit",
+      theme: "orange",
+      description: "Describe the architectural patterns, technologies, and high-performance components.",
+      tags: ["Python", "Next.js", "Cloud"],
+      skillBars: [
+        { name: "Core Architecture", level: "92%" },
+      ],
+      metrics: [
+        { label: "Throughput / Metric", value: "Sub-50ms" },
+      ],
+      principles: [
+        "Key architectural principle or system guarantee",
+      ],
+    };
+    setEditingSkillCard(newCard);
+  };
+
+  const handleSaveSkillCard = async () => {
+    if (!editingSkillCard) return;
+    if (!editingSkillCard.title.trim()) {
+      alert("Card title cannot be empty");
+      return;
+    }
+    setIsSavingSkillCard(true);
+    try {
+      const currentCards = getSkillsCards(data.skillsSection);
+      const exists = currentCards.some((c) => c.id === editingSkillCard.id);
+      let updatedCards: SkillCard[];
+      if (exists) {
+        updatedCards = currentCards.map((c) =>
+          c.id === editingSkillCard.id ? editingSkillCard : c
+        );
+      } else {
+        updatedCards = [...currentCards, editingSkillCard];
+      }
+      await updateSkillsCards(updatedCards);
+      setEditingSkillCard(null);
+      showToast("Architecture card successfully saved & synced!");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save card";
+      alert(`Save failed: ${msg}`);
+    } finally {
+      setIsSavingSkillCard(false);
+    }
+  };
+
+  const handleDeleteSkillCard = async (id: string, title: string) => {
+    if (confirm(`Are you sure you want to delete card "${title}"? This cannot be undone.`)) {
+      try {
+        const currentCards = getSkillsCards(data.skillsSection);
+        const updatedCards = currentCards.filter((c) => c.id !== id);
+        await updateSkillsCards(updatedCards);
+        showToast(`Card "${title}" deleted from database.`);
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to delete card";
+        alert(`Delete failed: ${msg}`);
+      }
+    }
+  };
+
+  const handleDuplicateSkillCard = async (card: SkillCard) => {
+    const duplicated: SkillCard = {
+      ...card,
+      id: `card-${Date.now()}`,
+      title: `${card.title} (Copy)`,
+    };
+    const currentCards = getSkillsCards(data.skillsSection);
+    await updateSkillsCards([...currentCards, duplicated]);
+    showToast(`Duplicated "${card.title}"!`);
   };
 
   const fetchMessages = useCallback(async () => {
@@ -368,8 +495,6 @@ export default function AdminPage() {
       </main>
     );
   }
-
-  const { bento } = data.skillsSection;
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-slate-900 flex flex-col md:flex-row relative">
@@ -723,35 +848,41 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* TAB 3: BENTO & SKILLS ARSENAL */}
+          {/* TAB 3: SKILLS & ARCHITECTURE CARDS */}
           {activeTab === "bento" && (
             <div className="space-y-8">
-              <div className="flex items-center justify-between">
+              {/* Header & Section Title Controls */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-900 font-display">Skills & Architecture Bento</h1>
+                  <h1 className="text-2xl font-bold text-slate-900 font-display flex items-center gap-2">
+                    <BrainCircuit className="w-6 h-6 text-orange-600" />
+                    <span>Skills & Architecture Cards</span>
+                  </h1>
                   <p className="text-xs text-slate-500">
-                    Full management for architecture specializations, skill bars, and system principles.
+                    Add, edit, delete, and resize technical skill cards in an equal-sized, fully customizable grid.
                   </p>
                 </div>
-                <button
-                  onClick={() => showToast("Architecture specifications saved!")}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm cursor-pointer"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>Save Changes</span>
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleCreateNewSkillCard}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm hover:shadow-warm-md hover:scale-102 transition-all cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add New Card</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Section Header Customization */}
+              {/* Section Header Metadata */}
               <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-warm-sm space-y-4">
-                <h3 className="text-base font-bold text-slate-900 font-display flex items-center gap-2">
+                <h3 className="text-sm font-bold text-slate-900 font-display flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-orange-500" />
-                  <span>Section Header & Sub-badge</span>
+                  <span>Section Header & Banner Text</span>
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-mono font-bold text-slate-700">Top Sub-Badge Text</label>
+                    <label className="text-xs font-mono font-bold text-slate-700">Top Pill Badge Text</label>
                     <input
                       type="text"
                       value={data.skillsSection.subBadge}
@@ -792,7 +923,7 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-mono font-bold text-slate-700">Section Overview</label>
+                  <label className="text-xs font-mono font-bold text-slate-700">Section Overview Description</label>
                   <textarea
                     rows={2}
                     value={data.skillsSection.description}
@@ -802,371 +933,484 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              {/* Bento Box 1: AI & ML */}
-              <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-warm-sm space-y-4">
-                <h3 className="text-base font-bold text-orange-700 font-display flex items-center gap-2">
-                  <Brain className="w-4 h-4 text-orange-500" />
-                  <span>Bento Card 1: AI & Machine Learning Architecture</span>
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-mono font-bold text-slate-700">Card Badge</label>
-                    <input
-                      type="text"
-                      value={bento.bento1.badge}
-                      onChange={(e) => {
-                        const newBento = { ...bento };
-                        newBento.bento1.badge = e.target.value;
-                        updateBentoConfig(newBento);
-                      }}
-                      className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
-                    />
+              {/* Dynamic Cards Grid */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-slate-900 font-display">
+                      Architecture Cards Arsenal
+                    </h3>
+                    <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-mono font-bold">
+                      {getSkillsCards(data.skillsSection).length} Cards Active
+                    </span>
                   </div>
-                  <div>
-                    <label className="text-xs font-mono font-bold text-slate-700">Heading Title</label>
-                    <input
-                      type="text"
-                      value={bento.bento1.title}
-                      onChange={(e) => {
-                        const newBento = { ...bento };
-                        newBento.bento1.title = e.target.value;
-                        updateBentoConfig(newBento);
-                      }}
-                      className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
-                    />
-                  </div>
+                  <p className="text-xs text-slate-400">Cards render in an equal-sized grid layout</p>
                 </div>
 
-                <div>
-                  <label className="text-xs font-mono font-bold text-slate-700">Description</label>
-                  <input
-                    type="text"
-                    value={bento.bento1.description}
-                    onChange={(e) => {
-                      const newBento = { ...bento };
-                      newBento.bento1.description = e.target.value;
-                      updateBentoConfig(newBento);
-                    }}
-                    className="w-full mt-1 px-4 py-2 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500"
-                  />
-                </div>
-
-                {/* Skill Tags */}
-                <div className="space-y-2">
-                  <label className="text-xs font-mono font-bold text-slate-700">Specialization Tags</label>
-                  <div className="flex flex-wrap gap-2">
-                    {bento.bento1.tags.map((tag, idx) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {getSkillsCards(data.skillsSection).map((card: SkillCard, idx: number) => {
+                    const themeChoice = AVAILABLE_THEMES.find((t) => t.id === card.theme) || AVAILABLE_THEMES[0];
+                    return (
                       <div
-                        key={idx}
-                        className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-orange-50 border border-orange-200 text-xs font-medium text-orange-800"
+                        key={card.id || `card-${idx}`}
+                        className="p-5 rounded-2xl bg-white border border-stone-200 shadow-warm-sm hover:shadow-warm-md hover:border-orange-300 transition-all flex flex-col justify-between space-y-4 relative group"
                       >
-                        <span>{tag}</span>
-                        <button
-                          onClick={() => {
-                            const newBento = { ...bento };
-                            newBento.bento1.tags = newBento.bento1.tags.filter((_, i) => i !== idx);
-                            updateBentoConfig(newBento);
-                          }}
-                          className="text-orange-400 hover:text-rose-600 ml-1 cursor-pointer"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                        <div className="space-y-3">
+                          {/* Top Row: Icon + Badge + Number */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-xs", themeChoice.bg)}>
+                                <BrainCircuit className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                                  Card #{idx + 1}
+                                </span>
+                                <p className="text-xs font-mono text-slate-500">{card.icon || "BrainCircuit"}</p>
+                              </div>
+                            </div>
+                            {card.badge && (
+                              <span className="px-2.5 py-0.5 rounded-full bg-stone-100 border border-stone-200 text-[11px] font-mono font-bold text-slate-700">
+                                {card.badge}
+                              </span>
+                            )}
+                          </div>
 
-                  <div className="flex gap-2 pt-2">
-                    <input
-                      type="text"
-                      placeholder="Add new tag"
-                      value={newBento1Tag}
-                      onChange={(e) => setNewBento1Tag(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" && newBento1Tag.trim()) {
-                          e.preventDefault();
-                          const newBento = { ...bento };
-                          newBento.bento1.tags.push(newBento1Tag.trim());
-                          updateBentoConfig(newBento);
-                          setNewBento1Tag("");
-                        }
-                      }}
-                      className="flex-1 px-3 py-1.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-xs focus:bg-white focus:border-orange-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (newBento1Tag.trim()) {
-                          const newBento = { ...bento };
-                          newBento.bento1.tags.push(newBento1Tag.trim());
-                          updateBentoConfig(newBento);
-                          setNewBento1Tag("");
-                        }
-                      }}
-                      className="px-4 py-1.5 rounded-xl bg-orange-50 text-orange-700 border border-orange-200 text-xs font-mono font-bold hover:bg-orange-500 hover:text-white transition-all cursor-pointer"
-                    >
-                      + Add
-                    </button>
-                  </div>
+                          {/* Title & Description */}
+                          <div>
+                            <h4 className="text-base font-bold text-slate-900 font-display line-clamp-1">
+                              {card.title}
+                            </h4>
+                            <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                              {card.description}
+                            </p>
+                          </div>
+
+                          {/* Components Preview */}
+                          <div className="space-y-1.5 pt-2 border-t border-stone-100 text-[11px] text-slate-600">
+                            {card.skillBars && card.skillBars.length > 0 && (
+                              <p className="flex items-center gap-1.5 text-amber-700 font-medium">
+                                <Layers className="w-3.5 h-3.5" />
+                                <span>{card.skillBars.length} Skill Progress Bars</span>
+                              </p>
+                            )}
+                            {card.tags && card.tags.length > 0 && (
+                              <p className="flex items-center gap-1.5 text-orange-700 font-medium">
+                                <Sparkles className="w-3.5 h-3.5" />
+                                <span>{card.tags.length} Specialization Tags</span>
+                              </p>
+                            )}
+                            {card.metrics && card.metrics.length > 0 && (
+                              <p className="flex items-center gap-1.5 text-blue-700 font-medium">
+                                <Activity className="w-3.5 h-3.5" />
+                                <span>{card.metrics.length} Performance Metrics</span>
+                              </p>
+                            )}
+                            {card.principles && card.principles.length > 0 && (
+                              <p className="flex items-center gap-1.5 text-rose-700 font-medium">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>{card.principles.length} System Principles</span>
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
+                          <button
+                            onClick={() => setEditingSkillCard(card)}
+                            className="flex-1 py-1.5 px-3 rounded-lg bg-orange-50 hover:bg-orange-500 hover:text-white text-orange-700 font-mono text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                            <span>Edit Card</span>
+                          </button>
+                          <button
+                            onClick={() => handleDuplicateSkillCard(card)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-stone-100 cursor-pointer"
+                            title="Duplicate Card"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSkillCard(card.id, card.title)}
+                            className="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                            title="Delete Card"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Bento Box 2: Full-Stack Skill Bars */}
-              <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-warm-sm space-y-4">
-                <h3 className="text-base font-bold text-amber-700 font-display flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-amber-500" />
-                  <span>Bento Card 2: Full-Stack Engineering Proficiency</span>
-                </h3>
-
-                <div className="space-y-3">
-                  {bento.bento2.skillBars.map((skill, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3 rounded-xl bg-stone-50 border border-stone-200 space-y-2"
-                    >
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="text"
-                          value={skill.name}
-                          onChange={(e) => {
-                            const newBento = { ...bento };
-                            newBento.bento2.skillBars[idx].name = e.target.value;
-                            updateBentoConfig(newBento);
-                          }}
-                          className="flex-1 px-3 py-1.5 rounded-lg bg-white border border-stone-200 text-slate-900 text-xs font-medium"
-                        />
-                        <input
-                          type="text"
-                          value={skill.level}
-                          onChange={(e) => {
-                            const newBento = { ...bento };
-                            newBento.bento2.skillBars[idx].level = e.target.value;
-                            updateBentoConfig(newBento);
-                          }}
-                          className="w-20 px-3 py-1.5 rounded-lg bg-white border border-stone-200 text-orange-600 font-mono font-bold text-xs text-center"
-                        />
-                        <button
-                          onClick={() => {
-                            const newBento = { ...bento };
-                            newBento.bento2.skillBars = newBento.bento2.skillBars.filter(
-                              (_, i) => i !== idx
-                            );
-                            updateBentoConfig(newBento);
-                          }}
-                          className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+              {/* CARD EDIT / CREATE MODAL */}
+              {editingSkillCard && (
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+                  <div className="w-full max-w-2xl bg-white rounded-3xl border border-stone-200 shadow-warm-lg p-6 sm:p-8 space-y-6 my-8 max-h-[90vh] overflow-y-auto">
+                    <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+                      <div>
+                        <h2 className="text-xl font-bold text-slate-900 font-display">
+                          {editingSkillCard.title ? `Edit Card: ${editingSkillCard.title}` : "Create New Architecture Card"}
+                        </h2>
+                        <p className="text-xs text-slate-500">Configure visual styling, skill bars, chips, and metrics.</p>
                       </div>
-
-                      <input
-                        type="range"
-                        min="1"
-                        max="100"
-                        value={parseInt(skill.level.replace("%", "")) || 80}
-                        onChange={(e) => {
-                          const newBento = { ...bento };
-                          newBento.bento2.skillBars[idx].level = `${e.target.value}%`;
-                          updateBentoConfig(newBento);
-                        }}
-                        className="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
-                      />
+                      <button
+                        onClick={() => setEditingSkillCard(null)}
+                        className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-stone-100 cursor-pointer"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
                     </div>
-                  ))}
 
-                  <button
-                    onClick={() => {
-                      const newBento = { ...bento };
-                      newBento.bento2.skillBars.push({ name: "Distributed Systems & WebSockets", level: "92%" });
-                      updateBentoConfig(newBento);
-                    }}
-                    className="flex items-center gap-1.5 text-xs text-orange-700 hover:text-orange-600 font-mono font-bold cursor-pointer pt-1"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>+ Add Skill Bar</span>
-                  </button>
-                </div>
-              </div>
+                    <div className="space-y-4">
+                      {/* Title & Badge */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-mono font-bold text-slate-700">Card Title</label>
+                          <input
+                            type="text"
+                            value={editingSkillCard.title}
+                            onChange={(e) => setEditingSkillCard({ ...editingSkillCard, title: e.target.value })}
+                            placeholder="e.g. Artificial Intelligence & LLMs"
+                            className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500 font-medium"
+                          />
+                        </div>
 
-              {/* Bento Box 3, 4, 5 */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Bento 3 */}
-                <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-warm-sm space-y-3">
-                  <h4 className="text-sm font-bold text-orange-700 flex items-center gap-2">
-                    <Server className="w-4 h-4 text-orange-500" />
-                    <span>Cloud Systems</span>
-                  </h4>
-                  <input
-                    type="text"
-                    value={bento.bento3.title}
-                    onChange={(e) => {
-                      const newBento = { ...bento };
-                      newBento.bento3.title = e.target.value;
-                      updateBentoConfig(newBento);
-                    }}
-                    className="w-full px-3 py-1.5 rounded-lg bg-stone-50 border border-stone-200 text-slate-900 text-xs font-semibold"
-                  />
-                  <div className="flex flex-wrap gap-1.5">
-                    {bento.bento3.tags.map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-0.5 rounded-md bg-orange-50 border border-orange-200 text-[10px] text-orange-800 font-mono flex items-center gap-1 font-medium"
-                      >
-                        {tag}
-                        <button
-                          onClick={() => {
-                            const newBento = { ...bento };
-                            newBento.bento3.tags = newBento.bento3.tags.filter((_, i) => i !== idx);
-                            updateBentoConfig(newBento);
-                          }}
-                          className="hover:text-rose-600"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-1">
-                    <input
-                      type="text"
-                      placeholder="Add tag"
-                      value={newBento3Tag}
-                      onChange={(e) => setNewBento3Tag(e.target.value)}
-                      className="w-full px-2 py-1 rounded bg-stone-50 border border-stone-200 text-slate-900 text-xs"
-                    />
-                    <button
-                      onClick={() => {
-                        if (newBento3Tag.trim()) {
-                          const newBento = { ...bento };
-                          newBento.bento3.tags.push(newBento3Tag.trim());
-                          updateBentoConfig(newBento);
-                          setNewBento3Tag("");
-                        }
-                      }}
-                      className="px-2 py-1 bg-orange-500 text-white text-xs font-bold rounded"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                {/* Bento 4 */}
-                <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-warm-sm space-y-3">
-                  <h4 className="text-sm font-bold text-amber-700 flex items-center gap-2">
-                    <Database className="w-4 h-4 text-amber-500" />
-                    <span>Vector & Storage</span>
-                  </h4>
-                  <input
-                    type="text"
-                    value={bento.bento4.title}
-                    onChange={(e) => {
-                      const newBento = { ...bento };
-                      newBento.bento4.title = e.target.value;
-                      updateBentoConfig(newBento);
-                    }}
-                    className="w-full px-3 py-1.5 rounded-lg bg-stone-50 border border-stone-200 text-slate-900 text-xs font-semibold"
-                  />
-                  <div className="flex flex-wrap gap-1.5">
-                    {bento.bento4.tags.map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-[10px] text-amber-800 font-mono flex items-center gap-1 font-medium"
-                      >
-                        {tag}
-                        <button
-                          onClick={() => {
-                            const newBento = { ...bento };
-                            newBento.bento4.tags = newBento.bento4.tags.filter((_, i) => i !== idx);
-                            updateBentoConfig(newBento);
-                          }}
-                          className="hover:text-rose-600"
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-1">
-                    <input
-                      type="text"
-                      placeholder="Add tag"
-                      value={newBento4Tag}
-                      onChange={(e) => setNewBento4Tag(e.target.value)}
-                      className="w-full px-2 py-1 rounded bg-stone-50 border border-stone-200 text-slate-900 text-xs"
-                    />
-                    <button
-                      onClick={() => {
-                        if (newBento4Tag.trim()) {
-                          const newBento = { ...bento };
-                          newBento.bento4.tags.push(newBento4Tag.trim());
-                          updateBentoConfig(newBento);
-                          setNewBento4Tag("");
-                        }
-                      }}
-                      className="px-2 py-1 bg-amber-500 text-white text-xs font-bold rounded"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                {/* Bento 5 */}
-                <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-warm-sm space-y-3">
-                  <h4 className="text-sm font-bold text-rose-700 flex items-center gap-2">
-                    <Workflow className="w-4 h-4 text-rose-500" />
-                    <span>System Principles</span>
-                  </h4>
-                  <input
-                    type="text"
-                    value={bento.bento5.title}
-                    onChange={(e) => {
-                      const newBento = { ...bento };
-                      newBento.bento5.title = e.target.value;
-                      updateBentoConfig(newBento);
-                    }}
-                    className="w-full px-3 py-1.5 rounded-lg bg-stone-50 border border-stone-200 text-slate-900 text-xs font-semibold"
-                  />
-                  <div className="space-y-1">
-                    {bento.bento5.principles.map((p, idx) => (
-                      <div key={idx} className="flex items-center justify-between text-[11px] text-slate-700 bg-stone-50 p-1.5 rounded border border-stone-100">
-                        <span className="line-clamp-1">{p}</span>
-                        <button
-                          onClick={() => {
-                            const newBento = { ...bento };
-                            newBento.bento5.principles = newBento.bento5.principles.filter((_, i) => i !== idx);
-                            updateBentoConfig(newBento);
-                          }}
-                          className="hover:text-rose-600 text-slate-400 ml-1"
-                        >
-                          ×
-                        </button>
+                        <div>
+                          <label className="text-xs font-mono font-bold text-slate-700">Badge / Pill Text</label>
+                          <input
+                            type="text"
+                            value={editingSkillCard.badge || ""}
+                            onChange={(e) => setEditingSkillCard({ ...editingSkillCard, badge: e.target.value })}
+                            placeholder="e.g. Core Specialization"
+                            className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500 font-medium"
+                          />
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                  <div className="flex gap-1">
-                    <input
-                      type="text"
-                      placeholder="Add principle"
-                      value={newBento5Principle}
-                      onChange={(e) => setNewBento5Principle(e.target.value)}
-                      className="w-full px-2 py-1 rounded bg-stone-50 border border-stone-200 text-slate-900 text-xs"
-                    />
-                    <button
-                      onClick={() => {
-                        if (newBento5Principle.trim()) {
-                          const newBento = { ...bento };
-                          newBento.bento5.principles.push(newBento5Principle.trim());
-                          updateBentoConfig(newBento);
-                          setNewBento5Principle("");
-                        }
-                      }}
-                      className="px-2 py-1 bg-rose-500 text-white text-xs font-bold rounded"
-                    >
-                      +
-                    </button>
+
+                      {/* Icon & Theme Selector */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs font-mono font-bold text-slate-700">Lucide Icon</label>
+                          <select
+                            value={editingSkillCard.icon || "BrainCircuit"}
+                            onChange={(e) => setEditingSkillCard({ ...editingSkillCard, icon: e.target.value })}
+                            className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm focus:bg-white focus:border-orange-500 font-mono"
+                          >
+                            {AVAILABLE_ICONS.map((icon) => (
+                              <option key={icon.name} value={icon.name}>
+                                {icon.name} ({icon.label})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-mono font-bold text-slate-700">Color Theme</label>
+                          <div className="grid grid-cols-6 gap-2 mt-1">
+                            {AVAILABLE_THEMES.map((theme) => (
+                              <button
+                                key={theme.id}
+                                type="button"
+                                onClick={() => setEditingSkillCard({ ...editingSkillCard, theme: theme.id })}
+                                className={cn(
+                                  "h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer",
+                                  theme.bg,
+                                  editingSkillCard.theme === theme.id ? "ring-2 ring-slate-900 ring-offset-2 scale-105" : "opacity-80 hover:opacity-100"
+                                )}
+                                title={theme.label}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <div>
+                        <label className="text-xs font-mono font-bold text-slate-700">Description</label>
+                        <textarea
+                          rows={3}
+                          value={editingSkillCard.description}
+                          onChange={(e) => setEditingSkillCard({ ...editingSkillCard, description: e.target.value })}
+                          placeholder="Describe architecture components, frameworks, and patterns..."
+                          className="w-full mt-1 px-4 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-slate-900 text-sm resize-none focus:bg-white focus:border-orange-500"
+                        />
+                      </div>
+
+                      {/* Specialization Tags / Chips */}
+                      <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+                        <label className="text-xs font-mono font-bold text-slate-700 flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+                          <span>Specialization Tags / Tech Chips</span>
+                        </label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(editingSkillCard.tags || []).map((tag, tIdx) => (
+                            <span
+                              key={tIdx}
+                              className="px-2.5 py-1 rounded-lg bg-white border border-stone-200 text-xs font-medium text-slate-800 flex items-center gap-1.5 shadow-xs"
+                            >
+                              <span>{tag}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updatedTags = (editingSkillCard.tags || []).filter((_, i) => i !== tIdx);
+                                  setEditingSkillCard({ ...editingSkillCard, tags: updatedTags });
+                                }}
+                                className="text-slate-400 hover:text-rose-600 cursor-pointer"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Add technology / tag (e.g. PyTorch, Next.js 16)"
+                            value={newCardTag}
+                            onChange={(e) => setNewCardTag(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && newCardTag.trim()) {
+                                e.preventDefault();
+                                const currentTags = editingSkillCard.tags || [];
+                                setEditingSkillCard({ ...editingSkillCard, tags: [...currentTags, newCardTag.trim()] });
+                                setNewCardTag("");
+                              }
+                            }}
+                            className="flex-1 px-3 py-1.5 rounded-xl bg-white border border-stone-200 text-slate-900 text-xs focus:border-orange-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (newCardTag.trim()) {
+                                const currentTags = editingSkillCard.tags || [];
+                                setEditingSkillCard({ ...editingSkillCard, tags: [...currentTags, newCardTag.trim()] });
+                                setNewCardTag("");
+                              }
+                            }}
+                            className="px-4 py-1.5 rounded-xl bg-orange-500 text-white text-xs font-mono font-bold cursor-pointer hover:bg-orange-600 transition-all"
+                          >
+                            + Add Tag
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Skill Level Bars */}
+                      <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-mono font-bold text-slate-700 flex items-center gap-1.5">
+                            <Layers className="w-3.5 h-3.5 text-amber-500" />
+                            <span>Skill Progress Bars (Optional)</span>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const currentBars = editingSkillCard.skillBars || [];
+                              setEditingSkillCard({
+                                ...editingSkillCard,
+                                skillBars: [...currentBars, { name: "New Skill", level: "90%" }],
+                              });
+                            }}
+                            className="text-xs text-orange-700 font-mono font-bold hover:underline cursor-pointer"
+                          >
+                            + Add Bar
+                          </button>
+                        </div>
+                        <div className="space-y-2">
+                          {(editingSkillCard.skillBars || []).map((bar, bIdx) => (
+                            <div key={bIdx} className="p-3 rounded-xl bg-white border border-stone-200 space-y-2">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="text"
+                                  value={bar.name}
+                                  onChange={(e) => {
+                                    const updatedBars = [...(editingSkillCard.skillBars || [])];
+                                    updatedBars[bIdx].name = e.target.value;
+                                    setEditingSkillCard({ ...editingSkillCard, skillBars: updatedBars });
+                                  }}
+                                  placeholder="Skill Name"
+                                  className="flex-1 px-3 py-1.5 rounded-lg bg-stone-50 border border-stone-200 text-xs font-medium"
+                                />
+                                <input
+                                  type="text"
+                                  value={bar.level}
+                                  onChange={(e) => {
+                                    const updatedBars = [...(editingSkillCard.skillBars || [])];
+                                    updatedBars[bIdx].level = e.target.value;
+                                    setEditingSkillCard({ ...editingSkillCard, skillBars: updatedBars });
+                                  }}
+                                  placeholder="Level %"
+                                  className="w-16 px-2 py-1.5 rounded-lg bg-stone-50 border border-stone-200 text-xs font-mono text-center font-bold text-orange-600"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updatedBars = (editingSkillCard.skillBars || []).filter((_, i) => i !== bIdx);
+                                    setEditingSkillCard({ ...editingSkillCard, skillBars: updatedBars });
+                                  }}
+                                  className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                              <input
+                                type="range"
+                                min="1"
+                                max="100"
+                                value={parseInt(bar.level.replace("%", "")) || 85}
+                                onChange={(e) => {
+                                  const updatedBars = [...(editingSkillCard.skillBars || [])];
+                                  updatedBars[bIdx].level = `${e.target.value}%`;
+                                  setEditingSkillCard({ ...editingSkillCard, skillBars: updatedBars });
+                                }}
+                                className="w-full h-1.5 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Performance Metrics */}
+                      <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-mono font-bold text-slate-700 flex items-center gap-1.5">
+                            <Activity className="w-3.5 h-3.5 text-blue-500" />
+                            <span>Performance Callout Metrics (Optional)</span>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const currentMetrics = editingSkillCard.metrics || [];
+                              setEditingSkillCard({
+                                ...editingSkillCard,
+                                metrics: [...currentMetrics, { label: "Metric Label", value: "<30ms" }],
+                              });
+                            }}
+                            className="text-xs text-orange-700 font-mono font-bold hover:underline cursor-pointer"
+                          >
+                            + Add Metric
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {(editingSkillCard.metrics || []).map((m, mIdx) => (
+                            <div key={mIdx} className="p-2.5 rounded-xl bg-white border border-stone-200 flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={m.label}
+                                onChange={(e) => {
+                                  const updated = [...(editingSkillCard.metrics || [])];
+                                  updated[mIdx].label = e.target.value;
+                                  setEditingSkillCard({ ...editingSkillCard, metrics: updated });
+                                }}
+                                placeholder="Label (e.g. Latency)"
+                                className="flex-1 px-2 py-1 rounded bg-stone-50 border border-stone-200 text-xs"
+                              />
+                              <input
+                                type="text"
+                                value={m.value}
+                                onChange={(e) => {
+                                  const updated = [...(editingSkillCard.metrics || [])];
+                                  updated[mIdx].value = e.target.value;
+                                  setEditingSkillCard({ ...editingSkillCard, metrics: updated });
+                                }}
+                                placeholder="Value (e.g. <45ms)"
+                                className="w-24 px-2 py-1 rounded bg-stone-50 border border-stone-200 text-xs font-mono font-bold text-orange-600"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = (editingSkillCard.metrics || []).filter((_, i) => i !== mIdx);
+                                  setEditingSkillCard({ ...editingSkillCard, metrics: updated });
+                                }}
+                                className="p-1 text-rose-400 hover:text-rose-600"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Principles / Bullet Points */}
+                      <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+                        <label className="text-xs font-mono font-bold text-slate-700 flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-rose-500" />
+                          <span>System Principles & Guarantees (Optional)</span>
+                        </label>
+                        <div className="space-y-1.5">
+                          {(editingSkillCard.principles || []).map((p, pIdx) => (
+                            <div key={pIdx} className="p-2 rounded-xl bg-white border border-stone-200 flex items-center justify-between text-xs text-slate-800">
+                              <span className="flex-1">{p}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const updated = (editingSkillCard.principles || []).filter((_, i) => i !== pIdx);
+                                  setEditingSkillCard({ ...editingSkillCard, principles: updated });
+                                }}
+                                className="text-slate-400 hover:text-rose-600 ml-2"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Add bullet principle (e.g. Zero-downtime rolling updates)"
+                            value={newCardPrinciple}
+                            onChange={(e) => setNewCardPrinciple(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && newCardPrinciple.trim()) {
+                                e.preventDefault();
+                                const currentP = editingSkillCard.principles || [];
+                                setEditingSkillCard({ ...editingSkillCard, principles: [...currentP, newCardPrinciple.trim()] });
+                                setNewCardPrinciple("");
+                              }
+                            }}
+                            className="flex-1 px-3 py-1.5 rounded-xl bg-white border border-stone-200 text-slate-900 text-xs focus:border-orange-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (newCardPrinciple.trim()) {
+                                const currentP = editingSkillCard.principles || [];
+                                setEditingSkillCard({ ...editingSkillCard, principles: [...currentP, newCardPrinciple.trim()] });
+                                setNewCardPrinciple("");
+                              }
+                            }}
+                            className="px-4 py-1.5 rounded-xl bg-rose-500 text-white text-xs font-mono font-bold cursor-pointer hover:bg-rose-600 transition-all"
+                          >
+                            + Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Modal Footer */}
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-stone-100">
+                      <button
+                        type="button"
+                        onClick={() => setEditingSkillCard(null)}
+                        className="px-5 py-2.5 rounded-xl border border-stone-200 text-slate-600 text-xs font-mono font-bold hover:bg-stone-50 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveSkillCard}
+                        disabled={isSavingSkillCard}
+                        className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-mono font-bold shadow-warm-sm hover:shadow-warm-md hover:scale-102 transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>{isSavingSkillCard ? "Saving Card..." : "Save Architecture Card"}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 

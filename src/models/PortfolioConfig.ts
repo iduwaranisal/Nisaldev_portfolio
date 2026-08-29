@@ -1,89 +1,12 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
+import { PortfolioData } from "@/data/portfolioData";
 
 export interface IPortfolioConfig extends Document {
-  general: {
-    brandName: string;
-    brandDomain: string;
-    availabilityStatus: string;
-    name: string;
-    role1: string;
-    role2: string;
-    tagline: string;
-    bio: string;
-    profileImage: string;
-    floatingBadge1: string;
-    floatingBadge2: string;
-    primaryBtnText: string;
-    secondaryBtnText: string;
-    resumeBtnText: string;
-    stats: { value: string; label: string }[];
-  };
-  skillsSection: {
-    subBadge: string;
-    titleMain: string;
-    titleAccent: string;
-    titleEnd: string;
-    description: string;
-    bento: {
-      bento1: {
-        badge: string;
-        title: string;
-        description: string;
-        tags: string[];
-        metric1Label: string;
-        metric1Value: string;
-        metric2Label: string;
-        metric2Value: string;
-      };
-      bento2: {
-        badge: string;
-        title: string;
-        description: string;
-        skillBars: { name: string; level: string }[];
-        metricLabel: string;
-        metricValue: string;
-      };
-      bento3: {
-        title: string;
-        description: string;
-        tags: string[];
-      };
-      bento4: {
-        title: string;
-        description: string;
-        tags: string[];
-      };
-      bento5: {
-        title: string;
-        principles: string[];
-      };
-    };
-  };
-  contactSection: {
-    subBadge: string;
-    titleMain: string;
-    titleAccent: string;
-    titleEnd: string;
-    description: string;
-    email: string;
-    location: string;
-    resumePdfUrl: string;
-    resumeCardTitle: string;
-    resumeCardDesc: string;
-  };
-  socialLinks: {
-    github: string;
-    linkedin: string;
-    twitter: string;
-    discord: string;
-  };
-  footer: {
-    brandTitle: string;
-    brandSub: string;
-    tagline: string;
-    copyrightText: string;
-    creditsText: string;
-  };
+  general: PortfolioData["general"];
+  skillsSection: PortfolioData["skillsSection"];
+  contactSection: PortfolioData["contactSection"];
+  socialLinks: PortfolioData["socialLinks"];
+  footer: PortfolioData["footer"];
 }
 
 const PortfolioConfigSchema = new Schema<IPortfolioConfig>(
@@ -116,6 +39,30 @@ const PortfolioConfigSchema = new Schema<IPortfolioConfig>(
       titleAccent: { type: String, default: "Expertise" },
       titleEnd: { type: String, default: "& Capabilities" },
       description: { type: String, default: "A high-performance technical stack forged across production AI pipelines, distributed cloud systems, and cutting-edge web applications." },
+      cards: [
+        {
+          id: { type: String },
+          title: { type: String },
+          badge: { type: String },
+          icon: { type: String },
+          theme: { type: String },
+          description: { type: String },
+          tags: [{ type: String }],
+          skillBars: [
+            {
+              name: { type: String },
+              level: { type: String },
+            },
+          ],
+          metrics: [
+            {
+              label: { type: String },
+              value: { type: String },
+            },
+          ],
+          principles: [{ type: String }],
+        },
+      ],
       bento: {
         bento1: {
           badge: { type: String, default: "Core Specialization" },

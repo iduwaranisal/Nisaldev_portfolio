@@ -7,6 +7,8 @@ import {
   Project,
   Article,
   BentoConfig,
+  SkillCard,
+  getSkillsCards,
 } from "@/data/portfolioData";
 
 import {
@@ -32,6 +34,10 @@ interface PortfolioContextType {
   refreshData: () => Promise<void>;
   updateGeneral: (fields: Partial<PortfolioData["general"]>) => Promise<void>;
   updateSkillsSection: (fields: Partial<PortfolioData["skillsSection"]>) => Promise<void>;
+  updateSkillsCards: (cards: SkillCard[]) => Promise<void>;
+  addSkillCard: (card: SkillCard) => Promise<void>;
+  updateSkillCard: (id: string, updated: Partial<SkillCard>) => Promise<void>;
+  deleteSkillCard: (id: string) => Promise<void>;
   updateBentoConfig: (bento: BentoConfig) => Promise<void>;
   updateProjectsSection: (fields: Partial<PortfolioData["projectsSection"]>) => Promise<void>;
   addProject: (project: Project) => Promise<void>;
@@ -156,6 +162,34 @@ export function PortfolioProvider({
       skillsSection: { ...data.skillsSection, ...fields },
     };
     await saveConfigToApi(updated);
+  };
+
+  const updateSkillsCards = async (cards: SkillCard[]) => {
+    const updated: PortfolioData = {
+      ...data,
+      skillsSection: { ...data.skillsSection, cards },
+    };
+    await saveConfigToApi(updated);
+  };
+
+  const addSkillCard = async (card: SkillCard) => {
+    const currentCards = getSkillsCards(data.skillsSection);
+    const updatedCards = [...currentCards, card];
+    await updateSkillsCards(updatedCards);
+  };
+
+  const updateSkillCard = async (id: string, updatedFields: Partial<SkillCard>) => {
+    const currentCards = getSkillsCards(data.skillsSection);
+    const updatedCards = currentCards.map((c) =>
+      c.id === id ? { ...c, ...updatedFields } : c
+    );
+    await updateSkillsCards(updatedCards);
+  };
+
+  const deleteSkillCard = async (id: string) => {
+    const currentCards = getSkillsCards(data.skillsSection);
+    const updatedCards = currentCards.filter((c) => c.id !== id);
+    await updateSkillsCards(updatedCards);
   };
 
   const updateBentoConfig = async (bento: BentoConfig) => {
@@ -419,6 +453,10 @@ export function PortfolioProvider({
         refreshData: fetchFromApi,
         updateGeneral,
         updateSkillsSection,
+        updateSkillsCards,
+        addSkillCard,
+        updateSkillCard,
+        deleteSkillCard,
         updateBentoConfig,
         updateProjectsSection,
         addProject,

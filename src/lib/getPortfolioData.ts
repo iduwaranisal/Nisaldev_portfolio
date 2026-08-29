@@ -3,11 +3,11 @@ import { connectToDatabase } from "./mongodb";
 import { PortfolioConfig } from "@/models/PortfolioConfig";
 import { ProjectModel } from "@/models/Project";
 import { ArticleModel } from "@/models/Article";
-import { INITIAL_PORTFOLIO_DATA, PortfolioData } from "@/data/portfolioData";
+import { INITIAL_PORTFOLIO_DATA, PortfolioData, getSkillsCards } from "@/data/portfolioData";
 
 function sanitizeUrl(url?: string): string {
   if (!url || typeof url !== "string") return "";
-  if (url.includes("unsplash.com")) return "";
+  if (url.includes("unsplash.com") || url.includes("images.unsplash.com")) return "";
   return url;
 }
 
@@ -44,9 +44,19 @@ export const getCachedPortfolioData = unstable_cache(
       const generalData = { ...configDoc.general };
       generalData.profileImage = sanitizeUrl(generalData.profileImage);
 
+      const skillsSec = configDoc.skillsSection || INITIAL_PORTFOLIO_DATA.skillsSection;
+      const cards = getSkillsCards(skillsSec);
+
       const fullData: PortfolioData = {
         general: generalData,
-        skillsSection: configDoc.skillsSection,
+        skillsSection: {
+          subBadge: skillsSec.subBadge || INITIAL_PORTFOLIO_DATA.skillsSection.subBadge,
+          titleMain: skillsSec.titleMain || INITIAL_PORTFOLIO_DATA.skillsSection.titleMain,
+          titleAccent: skillsSec.titleAccent || INITIAL_PORTFOLIO_DATA.skillsSection.titleAccent,
+          titleEnd: skillsSec.titleEnd || INITIAL_PORTFOLIO_DATA.skillsSection.titleEnd,
+          description: skillsSec.description || INITIAL_PORTFOLIO_DATA.skillsSection.description,
+          cards,
+        },
         projectsSection: {
           subBadge: INITIAL_PORTFOLIO_DATA.projectsSection.subBadge,
           titleMain: INITIAL_PORTFOLIO_DATA.projectsSection.titleMain,

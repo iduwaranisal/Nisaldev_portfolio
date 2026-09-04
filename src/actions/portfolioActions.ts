@@ -5,6 +5,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { PortfolioConfig } from "@/models/PortfolioConfig";
 import { ProjectModel } from "@/models/Project";
 import { ArticleModel } from "@/models/Article";
+import { TestimonialModel } from "@/models/Testimonial";
 import { INITIAL_PORTFOLIO_DATA, PortfolioData, getSkillsCards, DUMMY_PROJECT_IDS, DUMMY_ARTICLE_IDS } from "@/data/portfolioData";
 
 function sanitizeUrl(url?: string): string {
@@ -41,6 +42,22 @@ export async function getPortfolioDataAction(): Promise<PortfolioActionResult> {
 
     let projects = await ProjectModel.find().sort({ featured: -1, createdAt: -1 }).lean();
     let articles = await ArticleModel.find().sort({ createdAt: -1 }).lean();
+
+    // Ensure default testimonials exist if database is fresh
+    const totalTestimonials = await TestimonialModel.countDocuments();
+    if (totalTestimonials === 0 && INITIAL_PORTFOLIO_DATA.testimonialsSection?.testimonials?.length) {
+      await TestimonialModel.insertMany(
+        INITIAL_PORTFOLIO_DATA.testimonialsSection.testimonials.map((t) => ({
+          ...t,
+          status: "approved",
+          featured: false,
+        }))
+      );
+    }
+
+    let approvedTestimonials = await TestimonialModel.find({ status: "approved" })
+      .sort({ featured: -1, createdAt: -1 })
+      .lean();
 
     const generalData = { ...configDoc.general };
     generalData.profileImage = sanitizeUrl(generalData.profileImage);
@@ -99,7 +116,25 @@ export async function getPortfolioDataAction(): Promise<PortfolioActionResult> {
           tags: a.tags,
         })),
       },
-      testimonialsSection: INITIAL_PORTFOLIO_DATA.testimonialsSection,
+      testimonialsSection: {
+        subBadge: INITIAL_PORTFOLIO_DATA.testimonialsSection.subBadge,
+        titleMain: INITIAL_PORTFOLIO_DATA.testimonialsSection.titleMain,
+        titleAccent: INITIAL_PORTFOLIO_DATA.testimonialsSection.titleAccent,
+        titleEnd: INITIAL_PORTFOLIO_DATA.testimonialsSection.titleEnd,
+        description: INITIAL_PORTFOLIO_DATA.testimonialsSection.description,
+        testimonials: approvedTestimonials.map((t) => ({
+          id: t.id,
+          name: t.name,
+          role: t.role,
+          company: t.company,
+          content: t.content,
+          rating: t.rating,
+          avatar: t.avatar,
+          email: t.email,
+          status: t.status,
+          createdAt: t.createdAt ? new Date(t.createdAt).toISOString() : undefined,
+        })),
+      },
       contactSection: configDoc.contactSection || INITIAL_PORTFOLIO_DATA.contactSection,
       socialLinks: configDoc.socialLinks || INITIAL_PORTFOLIO_DATA.socialLinks,
       footer: configDoc.footer || INITIAL_PORTFOLIO_DATA.footer,

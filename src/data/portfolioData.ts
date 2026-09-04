@@ -39,6 +39,9 @@ export interface Testimonial {
   content: string;
   avatar?: string;
   rating?: number;
+  email?: string;
+  status?: "pending" | "approved" | "rejected";
+  createdAt?: string;
 }
 
 export type SkillCardTheme = "orange" | "amber" | "rose" | "blue" | "emerald" | "purple";

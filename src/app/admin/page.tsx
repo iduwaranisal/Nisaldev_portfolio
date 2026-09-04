@@ -2168,551 +2168,135 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* TAB: TESTIMONIALS & REVIEWS MANAGEMENT */}
+          {/* TAB: TESTIMONIALS & REVIEWS MANAGEMENT (SIMPLE & CLEAN) */}
           {activeTab === "testimonials" && (
             <div className="space-y-6">
               {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-2xl font-bold text-slate-900 font-display">
-                    Client Testimonials & Feedback Moderation
+                    Client Reviews & Feedback
                   </h1>
                   <p className="text-xs text-slate-500">
-                    Moderate public reviews, approve or decline client submissions, and curate quotes shown on your portfolio.
+                    Approve reviews to display them on your live portfolio, or decline and delete them.
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      setEditingTestimonial({
-                        name: "",
-                        role: "",
-                        company: "",
-                        content: "",
-                        rating: 5,
-                        avatar: "",
-                        email: "",
-                        status: "approved",
-                      })
-                    }
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm hover:shadow-warm-md hover:scale-102 transition-all cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add Testimonial Manually</span>
-                  </button>
-                  <button
-                    onClick={fetchTestimonials}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 text-orange-600 text-xs font-mono font-bold cursor-pointer shadow-xs hover:border-orange-300"
-                  >
-                    <RefreshCw className={cn("w-3.5 h-3.5", loadingTestimonials && "animate-spin")} />
-                    <span>Refresh</span>
-                  </button>
+                <button
+                  onClick={fetchTestimonials}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-stone-200 text-orange-600 text-xs font-mono font-bold cursor-pointer shadow-xs hover:border-orange-300"
+                >
+                  <RefreshCw className={cn("w-3.5 h-3.5", loadingTestimonials && "animate-spin")} />
+                  <span>Refresh</span>
+                </button>
+              </div>
+
+              {/* Reviews List */}
+              {adminTestimonials.length === 0 ? (
+                <div className="p-12 text-center rounded-3xl bg-white border border-stone-200 shadow-warm-sm space-y-2">
+                  <MessageSquareQuote className="w-10 h-10 text-slate-300 mx-auto" />
+                  <h3 className="text-base font-bold text-slate-700">No reviews yet</h3>
+                  <p className="text-xs text-slate-400">
+                    When visitors or clients submit feedback from the website, they will appear here for approval.
+                  </p>
                 </div>
-              </div>
-
-              {/* Analytics Summary */}
-              {(() => {
-                const total = adminTestimonials.length;
-                const pending = adminTestimonials.filter((t) => t.status === "pending").length;
-                const approved = adminTestimonials.filter((t) => t.status === "approved").length;
-                const avgRating =
-                  total > 0
-                    ? (
-                        adminTestimonials.reduce((sum, t) => sum + (t.rating || 5), 0) /
-                        total
-                      ).toFixed(1)
-                    : "5.0";
-
-                return (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-warm-sm">
-                      <p className="text-xs font-mono font-medium text-slate-400">Total Submissions</p>
-                      <p className="text-3xl font-bold font-mono text-slate-900 mt-1">{total}</p>
-                    </div>
+              ) : (
+                <div className="space-y-3">
+                  {adminTestimonials.map((item) => (
                     <div
-                      onClick={() => setTestimonialFilter("pending")}
+                      key={item.id}
                       className={cn(
-                        "p-5 rounded-2xl border shadow-warm-sm cursor-pointer transition-all",
-                        pending > 0
-                          ? "bg-amber-50/70 border-amber-200 hover:border-amber-400"
-                          : "bg-white border-stone-200"
+                        "p-5 rounded-2xl bg-white border shadow-warm-sm space-y-3 transition-all",
+                        item.status === "pending"
+                          ? "border-amber-300 ring-1 ring-amber-200/50"
+                          : "border-stone-200"
                       )}
                     >
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-mono font-medium text-amber-700">Pending Review</p>
-                        {pending > 0 && (
-                          <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-                        )}
-                      </div>
-                      <p className="text-3xl font-bold font-mono text-amber-700 mt-1">{pending}</p>
-                    </div>
-                    <div
-                      onClick={() => setTestimonialFilter("approved")}
-                      className="p-5 rounded-2xl bg-white border border-stone-200 shadow-warm-sm cursor-pointer hover:border-emerald-300 transition-all"
-                    >
-                      <p className="text-xs font-mono font-medium text-emerald-700">Live on Website</p>
-                      <p className="text-3xl font-bold font-mono text-emerald-600 mt-1">{approved}</p>
-                    </div>
-                    <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-warm-sm">
-                      <p className="text-xs font-mono font-medium text-slate-400">Average Rating</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-3xl font-bold font-mono text-amber-500">{avgRating}</p>
-                        <div className="flex items-center gap-0.5">
-                          <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Filter Tabs */}
-              <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-stone-100 border border-stone-200/80 w-fit">
-                {[
-                  { id: "all", label: "All Reviews", count: adminTestimonials.length },
-                  {
-                    id: "pending",
-                    label: "Pending Moderation",
-                    count: adminTestimonials.filter((t) => t.status === "pending").length,
-                  },
-                  {
-                    id: "approved",
-                    label: "Published Live",
-                    count: adminTestimonials.filter((t) => t.status === "approved").length,
-                  },
-                  {
-                    id: "rejected",
-                    label: "Declined",
-                    count: adminTestimonials.filter((t) => t.status === "rejected").length,
-                  },
-                ].map((f) => {
-                  const isActive = testimonialFilter === f.id;
-                  return (
-                    <button
-                      key={f.id}
-                      onClick={() => setTestimonialFilter(f.id as typeof testimonialFilter)}
-                      className={cn(
-                        "px-4 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer",
-                        isActive
-                          ? "bg-white text-slate-900 shadow-xs font-bold"
-                          : "text-slate-600 hover:text-slate-900"
-                      )}
-                    >
-                      <span>{f.label}</span>
-                      <span
-                        className={cn(
-                          "px-1.5 py-0.2 rounded-md text-[10px] font-mono",
-                          isActive
-                            ? "bg-orange-100 text-orange-700 font-bold"
-                            : "bg-stone-200/60 text-slate-600"
-                        )}
-                      >
-                        {f.count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Testimonials List */}
-              {(() => {
-                const filtered = adminTestimonials.filter((t) => {
-                  if (testimonialFilter === "all") return true;
-                  return t.status === testimonialFilter;
-                });
-
-                if (filtered.length === 0) {
-                  return (
-                    <div className="p-12 text-center rounded-3xl bg-white border border-stone-200 shadow-warm-sm space-y-3">
-                      <MessageSquareQuote className="w-10 h-10 text-slate-300 mx-auto" />
-                      <h3 className="text-base font-bold text-slate-700">No testimonials found</h3>
-                      <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                        {testimonialFilter === "pending"
-                          ? "All submissions are currently reviewed! No pending testimonials require moderation."
-                          : "No reviews match the selected filter category."}
-                      </p>
-                      {testimonialFilter !== "all" && (
-                        <button
-                          onClick={() => setTestimonialFilter("all")}
-                          className="px-4 py-1.5 rounded-xl bg-stone-100 text-xs text-slate-700 hover:bg-stone-200 cursor-pointer font-medium"
-                        >
-                          View All Reviews
-                        </button>
-                      )}
-                    </div>
-                  );
-                }
-
-                return (
-                  <div className="space-y-4">
-                    {filtered.map((item) => (
-                      <div
-                        key={item.id}
-                        className={cn(
-                          "p-6 rounded-2xl bg-white border shadow-warm-sm space-y-4 transition-all",
-                          item.status === "pending"
-                            ? "border-amber-300 ring-1 ring-amber-200/50"
-                            : "border-stone-200"
-                        )}
-                      >
-                        {/* Header Row */}
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                          <div className="flex items-start gap-3.5">
-                            {/* Avatar or Initials */}
-                            {item.avatar ? (
-                              <img
-                                src={item.avatar}
-                                alt={item.name}
-                                className="w-11 h-11 rounded-full object-cover border border-stone-200 shrink-0"
-                              />
-                            ) : (
-                              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-xs">
-                                {item.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
-                                  .slice(0, 2)
-                                  .toUpperCase()}
-                              </div>
-                            )}
-
-                            <div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <h3 className="text-base font-bold text-slate-900 font-display">
-                                  {item.name}
-                                </h3>
-                                {item.email && (
-                                  <span className="text-xs font-mono text-slate-400 flex items-center gap-1">
-                                    <Mail className="w-3 h-3 text-slate-400" />
-                                    <span>{item.email}</span>
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-slate-500 font-mono mt-0.5">
-                                {item.role}
-                                {item.company ? ` · ${item.company}` : ""}
-                              </p>
-
-                              {/* Star Rating */}
-                              <div className="flex items-center gap-1 mt-1.5">
-                                {[1, 2, 3, 4, 5].map((s) => (
-                                  <Star
-                                    key={s}
-                                    className={cn(
-                                      "w-3.5 h-3.5",
-                                      s <= (item.rating || 5)
-                                        ? "text-amber-400 fill-amber-400"
-                                        : "text-stone-200 fill-stone-200"
-                                    )}
-                                  />
-                                ))}
-                                <span className="text-[11px] font-mono font-semibold text-slate-500 ml-1.5">
-                                  {item.rating || 5}/5
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Status Badge + Date */}
-                          <div className="flex items-center sm:flex-col sm:items-end gap-2 shrink-0">
-                            {item.status === "pending" && (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-300 text-amber-800 text-xs font-mono font-bold">
-                                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                                <span>Pending Approval</span>
-                              </span>
-                            )}
-                            {item.status === "approved" && (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-mono font-bold">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                                <span>Published Live</span>
-                              </span>
-                            )}
-                            {item.status === "rejected" && (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-800 text-xs font-mono font-bold">
-                                <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
-                                <span>Declined</span>
-                              </span>
-                            )}
-
-                            {item.createdAt && (
-                              <span className="text-[11px] font-mono text-slate-400">
-                                {new Date(item.createdAt).toLocaleDateString(undefined, {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                })}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Quote Content */}
-                        <div className="p-4 rounded-xl bg-stone-50 border border-stone-100 text-xs sm:text-sm text-slate-700 leading-relaxed italic">
-                          &ldquo;{item.content}&rdquo;
-                        </div>
-
-                        {/* Card Actions Footer */}
-                        <div className="pt-3 border-t border-stone-100 flex flex-wrap items-center justify-between gap-3">
-                          {/* Left Moderation Controls */}
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {item.status !== "approved" && (
-                              <button
-                                onClick={() => handleStatusChange(item.id, "approved")}
-                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer shadow-xs"
-                              >
-                                <Check className="w-3.5 h-3.5" />
-                                <span>Approve & Publish</span>
-                              </button>
-                            )}
-
-                            {item.status === "pending" && (
-                              <button
-                                onClick={() => handleStatusChange(item.id, "rejected")}
-                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-rose-50 text-rose-700 hover:border-rose-300 border border-stone-200 text-xs font-semibold transition-colors cursor-pointer"
-                              >
-                                <X className="w-3.5 h-3.5" />
-                                <span>Decline Review</span>
-                              </button>
-                            )}
-
-                            {item.status === "approved" && (
-                              <button
-                                onClick={() => handleStatusChange(item.id, "pending")}
-                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 text-xs font-semibold transition-colors cursor-pointer"
-                              >
-                                <span>Move to Pending</span>
-                              </button>
-                            )}
-
-                            {item.status === "approved" && (
-                              <button
-                                onClick={() => handleStatusChange(item.id, "rejected")}
-                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-50 hover:bg-rose-50 border border-stone-200 hover:border-rose-300 text-rose-600 text-xs font-semibold transition-colors cursor-pointer"
-                              >
-                                <span>Unpublish</span>
-                              </button>
-                            )}
-
-                            {item.status === "rejected" && (
-                              <button
-                                onClick={() => handleStatusChange(item.id, "pending")}
-                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
-                              >
-                                <span>Reset to Pending</span>
-                              </button>
-                            )}
-                          </div>
-
-                          {/* Right Edit & Delete Controls */}
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              onClick={() => setEditingTestimonial(item)}
-                              className="p-1.5 text-slate-600 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors cursor-pointer"
-                              title="Edit Testimonial"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteTestimonial(item.id, item.name)}
-                              className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                              title="Delete Testimonial"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
-
-              {/* Add / Edit Testimonial Modal */}
-              <AnimatePresence>
-                {editingTestimonial && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onClick={() => !isSavingTestimonial && setEditingTestimonial(null)}
-                      className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
-                    />
-
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                      transition={{ type: "spring", duration: 0.3 }}
-                      className="relative w-full max-w-xl bg-white border border-stone-200 rounded-3xl overflow-hidden shadow-warm-lg z-10 my-6 flex flex-col"
-                    >
-                      <div className="p-6 border-b border-stone-100 flex items-center justify-between bg-stone-50/70">
+                      {/* Top Row: Name, Role, Rating & Status */}
+                      <div className="flex items-start justify-between gap-4">
                         <div>
-                          <h3 className="text-lg font-bold text-slate-900 font-display">
-                            {editingTestimonial.id ? "Edit Testimonial" : "Create New Testimonial"}
-                          </h3>
-                          <p className="text-xs text-slate-500">
-                            Configure client testimonial details, rating, and publication status.
-                          </p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="text-sm font-bold text-slate-900">{item.name}</h3>
+                            <span className="text-xs text-slate-500 font-mono">
+                              ({item.role}{item.company ? ` · ${item.company}` : ""})
+                            </span>
+                          </div>
+
+                          {/* Star Rating */}
+                          <div className="flex items-center gap-1 mt-1">
+                            {Array.from({ length: item.rating || 5 }).map((_, i) => (
+                              <Star key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                            ))}
+                          </div>
                         </div>
-                        <button
-                          onClick={() => setEditingTestimonial(null)}
-                          disabled={isSavingTestimonial}
-                          className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 cursor-pointer"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
+
+                        {/* Status Badge */}
+                        <div>
+                          {item.status === "pending" && (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-300 text-amber-800 text-[11px] font-mono font-bold">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                              <span>Pending</span>
+                            </span>
+                          )}
+                          {item.status === "approved" && (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-mono font-bold">
+                              <Check className="w-3 h-3 text-emerald-600" />
+                              <span>Approved & Live</span>
+                            </span>
+                          )}
+                          {item.status === "rejected" && (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-stone-100 border border-stone-200 text-slate-600 text-[11px] font-mono font-bold">
+                              <span>Declined</span>
+                            </span>
+                          )}
+                        </div>
                       </div>
 
-                      <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-700">Client Name *</label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="e.g. Jordan Miller"
-                              value={editingTestimonial.name || ""}
-                              onChange={(e) =>
-                                setEditingTestimonial({ ...editingTestimonial, name: e.target.value })
-                              }
-                              className="w-full px-3.5 py-2 rounded-xl border border-stone-200 text-xs focus:border-orange-500 focus:outline-none"
-                            />
-                          </div>
+                      {/* Quote */}
+                      <p className="text-xs sm:text-sm text-slate-700 bg-stone-50 p-3.5 rounded-xl leading-relaxed border border-stone-100">
+                        &ldquo;{item.content}&rdquo;
+                      </p>
 
-                          <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-700">Role / Title *</label>
-                            <input
-                              type="text"
-                              required
-                              placeholder="e.g. VP of Engineering"
-                              value={editingTestimonial.role || ""}
-                              onChange={(e) =>
-                                setEditingTestimonial({ ...editingTestimonial, role: e.target.value })
-                              }
-                              className="w-full px-3.5 py-2 rounded-xl border border-stone-200 text-xs focus:border-orange-500 focus:outline-none"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-700">Company</label>
-                            <input
-                              type="text"
-                              placeholder="e.g. CloudScale AI"
-                              value={editingTestimonial.company || ""}
-                              onChange={(e) =>
-                                setEditingTestimonial({ ...editingTestimonial, company: e.target.value })
-                              }
-                              className="w-full px-3.5 py-2 rounded-xl border border-stone-200 text-xs focus:border-orange-500 focus:outline-none"
-                            />
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-700">Email (Internal)</label>
-                            <input
-                              type="email"
-                              placeholder="jordan@company.com"
-                              value={editingTestimonial.email || ""}
-                              onChange={(e) =>
-                                setEditingTestimonial({ ...editingTestimonial, email: e.target.value })
-                              }
-                              className="w-full px-3.5 py-2 rounded-xl border border-stone-200 text-xs focus:border-orange-500 focus:outline-none"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-700">Star Rating (1 - 5)</label>
-                            <select
-                              value={editingTestimonial.rating || 5}
-                              onChange={(e) =>
-                                setEditingTestimonial({
-                                  ...editingTestimonial,
-                                  rating: parseInt(e.target.value, 10),
-                                })
-                              }
-                              className="w-full px-3.5 py-2 rounded-xl border border-stone-200 text-xs bg-white focus:border-orange-500 focus:outline-none"
+                      {/* Simple Actions */}
+                      <div className="flex items-center justify-between pt-1">
+                        <div className="flex items-center gap-2">
+                          {item.status !== "approved" ? (
+                            <button
+                              onClick={() => handleStatusChange(item.id, "approved")}
+                              className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors cursor-pointer"
                             >
-                              <option value={5}>⭐⭐⭐⭐⭐ 5 Stars (Exceptional)</option>
-                              <option value={4}>⭐⭐⭐⭐ 4 Stars (Very Good)</option>
-                              <option value={3}>⭐⭐⭐ 3 Stars (Good)</option>
-                              <option value={2}>⭐⭐ 2 Stars (Fair)</option>
-                              <option value={1}>⭐ 1 Star (Needs Work)</option>
-                            </select>
-                          </div>
-
-                          <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-700">Moderation Status</label>
-                            <select
-                              value={editingTestimonial.status || "approved"}
-                              onChange={(e) =>
-                                setEditingTestimonial({
-                                  ...editingTestimonial,
-                                  status: e.target.value as "pending" | "approved" | "rejected",
-                                })
-                              }
-                              className="w-full px-3.5 py-2 rounded-xl border border-stone-200 text-xs bg-white focus:border-orange-500 focus:outline-none"
+                              Approve
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleStatusChange(item.id, "rejected")}
+                              className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-slate-700 text-xs font-medium transition-colors cursor-pointer"
                             >
-                              <option value="approved">✅ Published Live (Approved)</option>
-                              <option value="pending">⏳ Pending Approval</option>
-                              <option value="rejected">❌ Declined (Rejected)</option>
-                            </select>
-                          </div>
+                              Unpublish
+                            </button>
+                          )}
+
+                          {item.status === "pending" && (
+                            <button
+                              onClick={() => handleStatusChange(item.id, "rejected")}
+                              className="px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 text-xs font-medium transition-colors cursor-pointer"
+                            >
+                              Decline
+                            </button>
+                          )}
                         </div>
 
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-slate-700">Avatar / Photo URL</label>
-                          <input
-                            type="url"
-                            placeholder="https://images.example.com/avatar.jpg"
-                            value={editingTestimonial.avatar || ""}
-                            onChange={(e) =>
-                              setEditingTestimonial({ ...editingTestimonial, avatar: e.target.value })
-                            }
-                            className="w-full px-3.5 py-2 rounded-xl border border-stone-200 text-xs focus:border-orange-500 focus:outline-none"
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-slate-700">Testimonial Quote *</label>
-                          <textarea
-                            rows={4}
-                            required
-                            placeholder="Quote content from client or colleague..."
-                            value={editingTestimonial.content || ""}
-                            onChange={(e) =>
-                              setEditingTestimonial({ ...editingTestimonial, content: e.target.value })
-                            }
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 text-xs focus:border-orange-500 focus:outline-none leading-relaxed"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="p-5 border-t border-stone-100 flex items-center justify-end gap-2.5 bg-stone-50/50">
                         <button
-                          type="button"
-                          onClick={() => setEditingTestimonial(null)}
-                          disabled={isSavingTestimonial}
-                          className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-stone-100 cursor-pointer"
+                          onClick={() => handleDeleteTestimonial(item.id, item.name)}
+                          className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
+                          title="Delete review"
                         >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleSaveTestimonialModal}
-                          disabled={isSavingTestimonial}
-                          className="px-5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-sm hover:shadow-warm-md cursor-pointer disabled:opacity-50"
-                        >
-                          {isSavingTestimonial ? "Saving..." : "Save Testimonial"}
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                    </motion.div>
-                  </div>
-                )}
-              </AnimatePresence>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

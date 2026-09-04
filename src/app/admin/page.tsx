@@ -181,6 +181,27 @@ export default function AdminPage() {
     toast.success(msg);
   };
 
+  // Confirmation Modal State
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    confirmLabel?: string;
+    onConfirm: () => void | Promise<void>;
+  } | null>(null);
+
+  const askConfirmation = (options: {
+    title: string;
+    description: string;
+    confirmLabel?: string;
+    onConfirm: () => void | Promise<void>;
+  }) => {
+    setConfirmModal({
+      isOpen: true,
+      ...options,
+    });
+  };
+
   // Projects State for Edit Modal
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
@@ -232,16 +253,20 @@ export default function AdminPage() {
     }
   };
 
-  const handleDeleteProject = async (id: string, title: string) => {
-    if (confirm(`Are you sure you want to delete project "${title}"? This cannot be undone.`)) {
-      try {
-        await deleteProject(id);
-        showToast(`Project "${title}" deleted from database.`);
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Failed to delete project";
-        toast.error(msg, "Delete Failed");
-      }
-    }
+  const handleDeleteProject = (id: string, title: string) => {
+    askConfirmation({
+      title: "Delete Project",
+      description: `Are you sure you want to delete project "${title}"? This cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          await deleteProject(id);
+          showToast(`Project "${title}" deleted from database.`);
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : "Failed to delete project";
+          toast.error(msg, "Delete Failed");
+        }
+      },
+    });
   };
 
   const handleSaveArticle = async () => {
@@ -268,16 +293,20 @@ export default function AdminPage() {
     }
   };
 
-  const handleDeleteArticle = async (id: string, title: string) => {
-    if (confirm(`Are you sure you want to delete article "${title}"? This cannot be undone.`)) {
-      try {
-        await deleteArticle(id);
-        showToast(`Article "${title}" deleted from database.`);
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Failed to delete article";
-        toast.error(msg, "Delete Failed");
-      }
-    }
+  const handleDeleteArticle = (id: string, title: string) => {
+    askConfirmation({
+      title: "Delete Article",
+      description: `Are you sure you want to delete article "${title}"? This cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          await deleteArticle(id);
+          showToast(`Article "${title}" deleted from database.`);
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : "Failed to delete article";
+          toast.error(msg, "Delete Failed");
+        }
+      },
+    });
   };
 
   const handleCreateNewSkillCard = () => {
@@ -331,18 +360,22 @@ export default function AdminPage() {
     }
   };
 
-  const handleDeleteSkillCard = async (id: string, title: string) => {
-    if (confirm(`Are you sure you want to delete card "${title}"? This cannot be undone.`)) {
-      try {
-        const currentCards = getSkillsCards(data.skillsSection);
-        const updatedCards = currentCards.filter((c) => c.id !== id);
-        await updateSkillsCards(updatedCards);
-        showToast(`Card "${title}" deleted from database.`);
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Failed to delete card";
-        toast.error(msg, "Delete Failed");
-      }
-    }
+  const handleDeleteSkillCard = (id: string, title: string) => {
+    askConfirmation({
+      title: "Delete Skill Card",
+      description: `Are you sure you want to delete card "${title}"? This cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          const currentCards = getSkillsCards(data.skillsSection);
+          const updatedCards = currentCards.filter((c) => c.id !== id);
+          await updateSkillsCards(updatedCards);
+          showToast(`Card "${title}" deleted from database.`);
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : "Failed to delete card";
+          toast.error(msg, "Delete Failed");
+        }
+      },
+    });
   };
 
   const handleDuplicateSkillCard = async (card: SkillCard) => {
@@ -413,21 +446,25 @@ export default function AdminPage() {
     }
   };
 
-  const handleDeleteTestimonial = async (id: string, name: string) => {
-    if (confirm(`Permanently delete testimonial from "${name}"? This action cannot be undone.`)) {
-      try {
-        const res = await deleteTestimonialAction(id);
-        if (res.success) {
-          setAdminTestimonials((prev) => prev.filter((t) => t.id !== id));
-          toast.success("Review deleted from database.", "Deleted");
-          refreshData();
-        } else {
-          toast.error(res.error || "Failed to delete testimonial", "Delete Failed");
+  const handleDeleteTestimonial = (id: string, name: string) => {
+    askConfirmation({
+      title: "Delete Testimonial",
+      description: `Permanently delete testimonial from "${name}"? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          const res = await deleteTestimonialAction(id);
+          if (res.success) {
+            setAdminTestimonials((prev) => prev.filter((t) => t.id !== id));
+            toast.success("Review deleted from database.", "Deleted");
+            refreshData();
+          } else {
+            toast.error(res.error || "Failed to delete testimonial", "Delete Failed");
+          }
+        } catch {
+          toast.error("Error deleting testimonial", "Server Error");
         }
-      } catch {
-        toast.error("Error deleting testimonial", "Server Error");
-      }
-    }
+      },
+    });
   };
 
   // Secure Server Auth Handler
@@ -2271,16 +2308,20 @@ export default function AdminPage() {
                             {new Date(msg.createdAt).toLocaleDateString()}
                           </span>
                           <button
-                            onClick={async () => {
-                              if (confirm("Delete this message?")) {
-                                const delRes = await deleteContactMessageAction(msg._id);
-                                if (delRes.success) {
-                                  setInboxMessages((prev) => prev.filter((m) => m._id !== msg._id));
-                                  showToast("Message removed.");
-                                } else {
-                                  toast.error(delRes.error || "Failed to delete message", "Delete Failed");
-                                }
-                              }
+                            onClick={() => {
+                              askConfirmation({
+                                title: "Delete Message",
+                                description: `Are you sure you want to delete the message from "${msg.name}"? This cannot be undone.`,
+                                onConfirm: async () => {
+                                  const delRes = await deleteContactMessageAction(msg._id);
+                                  if (delRes.success) {
+                                    setInboxMessages((prev) => prev.filter((m) => m._id !== msg._id));
+                                    showToast("Message removed.");
+                                  } else {
+                                    toast.error(delRes.error || "Failed to delete message", "Delete Failed");
+                                  }
+                                },
+                              });
                             }}
                             className="p-1.5 text-rose-500 hover:bg-rose-50 rounded cursor-pointer"
                             title="Delete message"
@@ -2643,6 +2684,43 @@ export default function AdminPage() {
           )}
         </div>
       </main>
+
+      {/* In-app Confirmation Modal */}
+      {confirmModal && confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-stone-200 shadow-2xl p-6 max-w-md w-full space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-slate-900">{confirmModal.title}</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">{confirmModal.description}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-stone-100">
+              <button
+                type="button"
+                onClick={() => setConfirmModal(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-stone-100 transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const action = confirmModal.onConfirm;
+                  setConfirmModal(null);
+                  await action();
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-sm transition-all cursor-pointer"
+              >
+                {confirmModal.confirmLabel || "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

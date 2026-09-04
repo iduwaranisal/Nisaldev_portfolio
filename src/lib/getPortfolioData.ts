@@ -91,6 +91,7 @@ export const getCachedPortfolioData = unstable_cache(
             tags: a.tags,
           })),
         },
+        testimonialsSection: INITIAL_PORTFOLIO_DATA.testimonialsSection,
         contactSection: configDoc.contactSection,
         socialLinks: configDoc.socialLinks,
         footer: configDoc.footer,

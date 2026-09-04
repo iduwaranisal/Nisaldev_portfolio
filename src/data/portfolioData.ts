@@ -31,6 +31,16 @@ export interface Article {
   tags: string[];
 }
 
+export interface Testimonial {
+  id: string;
+  name: string;
+  role: string;
+  company: string;
+  content: string;
+  avatar?: string;
+  rating?: number;
+}
+
 export type SkillCardTheme = "orange" | "amber" | "rose" | "blue" | "emerald" | "purple";
 
 export interface SkillBar {
@@ -139,6 +149,14 @@ export interface PortfolioData {
     titleEnd: string;
     description: string;
     articles: Article[];
+  };
+  testimonialsSection: {
+    subBadge: string;
+    titleMain: string;
+    titleAccent: string;
+    titleEnd: string;
+    description: string;
+    testimonials: Testimonial[];
   };
   contactSection: {
     subBadge: string;
@@ -317,6 +335,70 @@ export const INITIAL_PORTFOLIO_DATA: PortfolioData = {
     titleEnd: "& Guides",
     description: "Practical guides and tutorials on building AI applications, modern web development, and database architecture.",
     articles: [],
+  },
+  testimonialsSection: {
+    subBadge: "Client Testimonials",
+    titleMain: "What People",
+    titleAccent: "Say",
+    titleEnd: "About My Work",
+    description:
+      "Feedback from clients, collaborators, and colleagues I've had the pleasure of working with on various projects.",
+    testimonials: [
+      {
+        id: "testimonial-1",
+        name: "Sarah Chen",
+        role: "CTO",
+        company: "NovaTech Solutions",
+        content:
+          "Nisal delivered an outstanding AI-powered analytics dashboard that exceeded our expectations. His ability to bridge machine learning with clean, production-ready web applications is remarkable.",
+        rating: 5,
+      },
+      {
+        id: "testimonial-2",
+        name: "Marcus Williams",
+        role: "Product Manager",
+        company: "DataFlow Systems",
+        content:
+          "Working with Nisal was a fantastic experience. He transformed our complex data pipeline requirements into an elegant, user-friendly interface. His full-stack expertise really shines through.",
+        rating: 5,
+      },
+      {
+        id: "testimonial-3",
+        name: "Ayesha Rahman",
+        role: "Lead Developer",
+        company: "CloudBridge AI",
+        content:
+          "Nisal's deep understanding of both AI architectures and modern web frameworks made him the perfect fit for our LLM integration project. The results were impressive and delivered ahead of schedule.",
+        rating: 5,
+      },
+      {
+        id: "testimonial-4",
+        name: "David Park",
+        role: "Startup Founder",
+        company: "Velocity Labs",
+        content:
+          "From database design to deploying a fully containerized application, Nisal handled everything with professionalism. His end-to-end development approach saved us weeks of coordination.",
+        rating: 5,
+      },
+      {
+        id: "testimonial-5",
+        name: "Elena Kowalski",
+        role: "Engineering Manager",
+        company: "Nexus Digital",
+        content:
+          "Nisal's code quality and attention to detail are exceptional. He built a Next.js platform for us that's both performant and maintainable. A truly skilled full-stack developer.",
+        rating: 5,
+      },
+      {
+        id: "testimonial-6",
+        name: "James Rodrigo",
+        role: "AI Research Lead",
+        company: "IntelliCore Labs",
+        content:
+          "Nisal seamlessly integrated our PyTorch models into a production web application with real-time inference. His understanding of MLOps and deployment best practices is top-notch.",
+        rating: 5,
+      },
+    ],
   },
   contactSection: {
     subBadge: "Get In Touch",

@@ -99,6 +99,7 @@ export async function getPortfolioDataAction(): Promise<PortfolioActionResult> {
           tags: a.tags,
         })),
       },
+      testimonialsSection: INITIAL_PORTFOLIO_DATA.testimonialsSection,
       contactSection: configDoc.contactSection || INITIAL_PORTFOLIO_DATA.contactSection,
       socialLinks: configDoc.socialLinks || INITIAL_PORTFOLIO_DATA.socialLinks,
       footer: configDoc.footer || INITIAL_PORTFOLIO_DATA.footer,

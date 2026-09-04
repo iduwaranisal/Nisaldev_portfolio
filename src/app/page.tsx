@@ -14,6 +14,11 @@ const BlogSection = dynamic(() => import("@/components/BlogSection"), {
   loading: () => <div className="min-h-[300px]" />,
 });
 
+const TestimonialsSection = dynamic(() => import("@/components/TestimonialsSection"), {
+  ssr: true,
+  loading: () => <div className="min-h-[300px]" />,
+});
+
 const ContactSection = dynamic(() => import("@/components/ContactSection"), {
   ssr: true,
   loading: () => <div className="min-h-[400px]" />,
@@ -33,6 +38,7 @@ export default function Home() {
       <BentoGrid />
       <ProjectShowcase />
       <BlogSection />
+      <TestimonialsSection />
       <ContactSection />
       <Footer />
     </main>

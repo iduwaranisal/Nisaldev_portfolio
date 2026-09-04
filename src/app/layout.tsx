@@ -4,6 +4,7 @@ import "./globals.css";
 import BackgroundElements from "@/components/BackgroundElements";
 import ScrollProgress from "@/components/ScrollProgress";
 import { PortfolioProvider } from "@/context/PortfolioContext";
+import { ToastProvider } from "@/context/ToastContext";
 import { getCachedPortfolioData } from "@/lib/getPortfolioData";
 
 const inter = Inter({
@@ -230,9 +231,11 @@ export default async function RootLayout({
       </head>
       <body className="bg-[#FAF9F6] text-slate-900 min-h-screen relative font-sans antialiased selection:bg-orange-500/20 selection:text-orange-950">
         <PortfolioProvider initialData={initialData}>
-          <ScrollProgress />
-          <BackgroundElements />
-          <div className="relative z-10">{children}</div>
+          <ToastProvider>
+            <ScrollProgress />
+            <BackgroundElements />
+            <div className="relative z-10">{children}</div>
+          </ToastProvider>
         </PortfolioProvider>
       </body>
     </html>

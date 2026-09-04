@@ -3,10 +3,12 @@
 import React, { useState } from "react";
 import { Star, MessageSquarePlus, Check, Send, Loader2 } from "lucide-react";
 import { usePortfolio } from "@/context/PortfolioContext";
+import { useToast } from "@/context/ToastContext";
 import { submitTestimonialAction } from "@/actions/testimonialActions";
 
 export default function TestimonialsSection() {
   const { data } = usePortfolio();
+  const { toast } = useToast();
   const { testimonialsSection } = data;
   const testimonials = testimonialsSection?.testimonials || [];
 
@@ -17,14 +19,12 @@ export default function TestimonialsSection() {
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !role.trim() || !content.trim()) return;
 
     setIsSubmitting(true);
-    setMessage(null);
 
     try {
       const res = await submitTestimonialAction({
@@ -35,23 +35,20 @@ export default function TestimonialsSection() {
       });
 
       if (res.success) {
-        setMessage({
-          type: "success",
-          text: "Thank you! Your review has been submitted for review.",
-        });
+        toast.success(
+          "Thank you! Your feedback has been submitted and will appear once approved.",
+          "Review Submitted"
+        );
         setName("");
         setRole("");
         setContent("");
         setRating(5);
-        setTimeout(() => {
-          setShowForm(false);
-          setMessage(null);
-        }, 4000);
+        setShowForm(false);
       } else {
-        setMessage({ type: "error", text: res.error || "Failed to submit. Please try again." });
+        toast.error(res.error || "Failed to submit. Please check your fields.", "Submission Error");
       }
     } catch {
-      setMessage({ type: "error", text: "Something went wrong. Please try again." });
+      toast.error("Something went wrong. Please try again later.", "Submission Error");
     } finally {
       setIsSubmitting(false);
     }
@@ -146,18 +143,6 @@ export default function TestimonialsSection() {
                   Cancel
                 </button>
               </div>
-
-              {message && (
-                <div
-                  className={`p-3 rounded-xl text-xs font-medium ${
-                    message.type === "success"
-                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                      : "bg-rose-50 text-rose-800 border border-rose-200"
-                  }`}
-                >
-                  {message.text}
-                </div>
-              )}
 
               <form onSubmit={handleSubmit} className="space-y-3">
                 {/* Rating Selector */}

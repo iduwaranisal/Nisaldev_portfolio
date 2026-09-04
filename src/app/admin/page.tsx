@@ -53,6 +53,7 @@ import {
   Check,
 } from "lucide-react";
 import { usePortfolio } from "@/context/PortfolioContext";
+import { useToast } from "@/context/ToastContext";
 import {
   Project,
   Article,
@@ -173,12 +174,11 @@ export default function AdminPage() {
   // Active Tab
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
 
-  // Toast feedback
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  // Toast system
+  const { toast } = useToast();
 
   const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    toast.success(msg);
   };
 
   // Projects State for Edit Modal
@@ -207,14 +207,11 @@ export default function AdminPage() {
   // Testimonials State
   const [adminTestimonials, setAdminTestimonials] = useState<Testimonial[]>([]);
   const [loadingTestimonials, setLoadingTestimonials] = useState(false);
-  const [testimonialFilter, setTestimonialFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
-  const [editingTestimonial, setEditingTestimonial] = useState<Partial<Testimonial> | null>(null);
-  const [isSavingTestimonial, setIsSavingTestimonial] = useState(false);
 
   const handleSaveProject = async () => {
     if (!editingProject) return;
     if (!editingProject.title.trim()) {
-      alert("Project title cannot be empty");
+      toast.error("Project title cannot be empty");
       return;
     }
     setIsSavingProject(true);
@@ -229,7 +226,7 @@ export default function AdminPage() {
       showToast("Project successfully saved & synced to MongoDB!");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to save project";
-      alert(`Save failed: ${msg}`);
+      toast.error(msg, "Save Failed");
     } finally {
       setIsSavingProject(false);
     }
@@ -242,7 +239,7 @@ export default function AdminPage() {
         showToast(`Project "${title}" deleted from database.`);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Failed to delete project";
-        alert(`Delete failed: ${msg}`);
+        toast.error(msg, "Delete Failed");
       }
     }
   };
@@ -250,7 +247,7 @@ export default function AdminPage() {
   const handleSaveArticle = async () => {
     if (!editingArticle) return;
     if (!editingArticle.title.trim()) {
-      alert("Article title cannot be empty");
+      toast.error("Article title cannot be empty");
       return;
     }
     setIsSavingArticle(true);
@@ -265,7 +262,7 @@ export default function AdminPage() {
       showToast("Article successfully saved & published!");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to save article";
-      alert(`Save failed: ${msg}`);
+      toast.error(msg, "Save Failed");
     } finally {
       setIsSavingArticle(false);
     }
@@ -278,7 +275,7 @@ export default function AdminPage() {
         showToast(`Article "${title}" deleted from database.`);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Failed to delete article";
-        alert(`Delete failed: ${msg}`);
+        toast.error(msg, "Delete Failed");
       }
     }
   };
@@ -308,7 +305,7 @@ export default function AdminPage() {
   const handleSaveSkillCard = async () => {
     if (!editingSkillCard) return;
     if (!editingSkillCard.title.trim()) {
-      alert("Card title cannot be empty");
+      toast.error("Card title cannot be empty");
       return;
     }
     setIsSavingSkillCard(true);
@@ -328,7 +325,7 @@ export default function AdminPage() {
       showToast("Architecture card successfully saved & synced!");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to save card";
-      alert(`Save failed: ${msg}`);
+      toast.error(msg, "Save Failed");
     } finally {
       setIsSavingSkillCard(false);
     }
@@ -343,7 +340,7 @@ export default function AdminPage() {
         showToast(`Card "${title}" deleted from database.`);
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Failed to delete card";
-        alert(`Delete failed: ${msg}`);
+        toast.error(msg, "Delete Failed");
       }
     }
   };
@@ -406,13 +403,13 @@ export default function AdminPage() {
         setAdminTestimonials((prev) =>
           prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t))
         );
-        showToast(`Testimonial status updated to ${newStatus}.`);
+        toast.success(`Review status updated to ${newStatus}.`, "Status Updated");
         refreshData();
       } else {
-        alert(res.error || "Failed to update status");
+        toast.error(res.error || "Failed to update status", "Update Failed");
       }
     } catch {
-      alert("Error updating testimonial status");
+      toast.error("Error updating testimonial status", "Server Error");
     }
   };
 
@@ -422,70 +419,14 @@ export default function AdminPage() {
         const res = await deleteTestimonialAction(id);
         if (res.success) {
           setAdminTestimonials((prev) => prev.filter((t) => t.id !== id));
-          showToast("Testimonial deleted from database.");
+          toast.success("Review deleted from database.", "Deleted");
           refreshData();
         } else {
-          alert(res.error || "Failed to delete testimonial");
+          toast.error(res.error || "Failed to delete testimonial", "Delete Failed");
         }
       } catch {
-        alert("Error deleting testimonial");
+        toast.error("Error deleting testimonial", "Server Error");
       }
-    }
-  };
-
-  const handleSaveTestimonialModal = async () => {
-    if (!editingTestimonial) return;
-    if (!editingTestimonial.name?.trim() || !editingTestimonial.role?.trim() || !editingTestimonial.content?.trim()) {
-      alert("Name, role, and feedback content are required.");
-      return;
-    }
-
-    setIsSavingTestimonial(true);
-    try {
-      if (editingTestimonial.id) {
-        const res = await updateAdminTestimonialAction(editingTestimonial.id, {
-          name: editingTestimonial.name,
-          role: editingTestimonial.role,
-          company: editingTestimonial.company,
-          content: editingTestimonial.content,
-          rating: editingTestimonial.rating,
-          avatar: editingTestimonial.avatar,
-          email: editingTestimonial.email,
-          status: editingTestimonial.status as "pending" | "approved" | "rejected",
-        });
-        if (res.success) {
-          showToast("Testimonial updated successfully!");
-          setEditingTestimonial(null);
-          await fetchTestimonials();
-          refreshData();
-        } else {
-          alert(res.error || "Failed to update testimonial");
-        }
-      } else {
-        const res = await createAdminTestimonialAction({
-          name: editingTestimonial.name,
-          role: editingTestimonial.role,
-          company: editingTestimonial.company,
-          content: editingTestimonial.content,
-          rating: editingTestimonial.rating || 5,
-          avatar: editingTestimonial.avatar,
-          email: editingTestimonial.email,
-          status: (editingTestimonial.status as "pending" | "approved" | "rejected") || "approved",
-        });
-        if (res.success) {
-          showToast("Testimonial created and published!");
-          setEditingTestimonial(null);
-          await fetchTestimonials();
-          refreshData();
-        } else {
-          alert(res.error || "Failed to create testimonial");
-        }
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to save testimonial";
-      alert(msg);
-    } finally {
-      setIsSavingTestimonial(false);
     }
   };
 
@@ -627,21 +568,6 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-slate-900 flex flex-col md:flex-row relative">
-      {/* Toast Notification */}
-      <AnimatePresence>
-        {toastMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-6 right-6 z-50 px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs shadow-warm-lg flex items-center gap-2"
-          >
-            <CheckCircle2 className="w-4 h-4 text-white" />
-            <span>{toastMessage}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Admin Sidebar */}
       <aside className="w-full md:w-64 bg-white border-r border-stone-200 p-5 flex flex-col justify-between shrink-0 shadow-xs">
         <div className="space-y-6">
@@ -863,7 +789,7 @@ export default function AdminPage() {
                                 }
                               } catch (err: unknown) {
                                 const msg = err instanceof Error ? err.message : "Upload failed";
-                                alert(msg);
+                                toast.error(msg, "Upload Failed");
                               } finally {
                                 setIsUploadingProfile(false);
                               }
@@ -1837,7 +1763,7 @@ export default function AdminPage() {
                                 }
                               } catch (err: unknown) {
                                 const msg = err instanceof Error ? err.message : "Upload failed";
-                                alert(msg);
+                                toast.error(msg, "Upload Failed");
                               } finally {
                                 setIsUploadingProjectImg(false);
                               }
@@ -2352,7 +2278,7 @@ export default function AdminPage() {
                                   setInboxMessages((prev) => prev.filter((m) => m._id !== msg._id));
                                   showToast("Message removed.");
                                 } else {
-                                  alert(delRes.error || "Failed to delete message");
+                                  toast.error(delRes.error || "Failed to delete message", "Delete Failed");
                                 }
                               }
                             }}
@@ -2443,7 +2369,7 @@ export default function AdminPage() {
                             }
                           } catch (err: unknown) {
                             const msg = err instanceof Error ? err.message : "PDF upload failed";
-                            alert(msg);
+                            toast.error(msg, "Upload Failed");
                           } finally {
                             setIsUploadingResume(false);
                           }

@@ -4,6 +4,7 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Clock, Calendar, Tag, Share2 } from "lucide-react";
 import { Article } from "@/data/portfolioData";
+import { useToast } from "@/context/ToastContext";
 
 interface ArticleModalProps {
   article: Article | null;
@@ -11,6 +12,7 @@ interface ArticleModalProps {
 }
 
 export default function ArticleModal({ article, onClose }: ArticleModalProps) {
+  const { toast } = useToast();
   if (!article) return null;
 
   return (
@@ -92,7 +94,7 @@ export default function ArticleModal({ article, onClose }: ArticleModalProps) {
                 onClick={() => {
                   if (navigator.clipboard) {
                     navigator.clipboard.writeText(window.location.href);
-                    alert("Article link copied to clipboard!");
+                    toast.success("Article link copied to clipboard!", "Link Copied");
                   }
                 }}
                 className="inline-flex items-center gap-2 text-xs font-mono font-bold text-orange-600 hover:text-orange-700 cursor-pointer"

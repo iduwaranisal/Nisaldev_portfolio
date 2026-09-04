@@ -14,10 +14,12 @@ import {
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { usePortfolio } from "@/context/PortfolioContext";
+import { useToast } from "@/context/ToastContext";
 import { sendContactMessageAction } from "@/actions/contactActions";
 
 export default function ContactSection() {
   const { data } = usePortfolio();
+  const { toast } = useToast();
   const { contactSection } = data;
 
   const [formData, setFormData] = useState({
@@ -45,6 +47,7 @@ export default function ContactSection() {
       }
 
       setSubmitted(true);
+      toast.success("Your message has been received! I'll get back to you shortly.", "Message Sent");
 
       // Trigger Confetti Celebration
       try {
@@ -58,6 +61,7 @@ export default function ContactSection() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to send message";
       setSubmitError(msg);
+      toast.error(msg, "Message Failed");
     } finally {
       setIsSubmitting(false);
     }
